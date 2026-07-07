@@ -1,0 +1,295 @@
+import os
+import sys
+import webbrowser
+import threading
+import time
+import asyncio
+import shutil
+from typing import List
+from contextlib import contextmanager
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse, JSONResponse
+import uvicorn
+
+# Adiciona o diretório atual ao path para importar o motor
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from conversor_motor import (
+    converter_arquivo, obter_saidas_permitidas, ConversionError,
+    juntar_pdfs, dividir_pdf, proteger_pdf, desbloquear_pdf,
+    pdf_para_imagens, imagens_para_pdf
+)
+
+app = FastAPI(title="Conversor de Arquivos - Web Interface")
+
+active_websockets = []
+
+@app.websocket("/ws/log")
+async def websocket_log(websocket: WebSocket):
+    await websocket.accept()
+    active_websockets.append(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        active_websockets.remove(websocket)
+
+class WsRedirector:
+    def __init__(self, original_stream, loop):
+        self.original_stream = original_stream
+        self.loop = loop
+
+    def write(self, text):
+        self.original_stream.write(text)
+        if text and active_websockets:
+            for ws in active_websockets.copy():
+                try:
+                    asyncio.run_coroutine_threadsafe(ws.send_text(text), self.loop)
+                except Exception:
+                    pass
+
+    def flush(self):
+        self.original_stream.flush()
+
+@contextmanager
+def redirect_to_ws(loop):
+    orig_stdout = sys.stdout
+    orig_stderr = sys.stderr
+    sys.stdout = WsRedirector(orig_stdout, loop)
+    sys.stderr = WsRedirector(orig_stderr, loop)
+    try:
+        yield
+    finally:
+        sys.stdout = orig_stdout
+        sys.stderr = orig_stderr
+
+@app.get("/")
+def serve_index():
+    """
+    Serve a página principal index.html, suportando modo PyInstaller (.exe) ou script.
+    """
+    # Verifica se está rodando como um executável compilado
+    if getattr(sys, 'frozen', False):
+        base_dir = sys._MEIPASS # Pasta temporária do PyInstaller
+    else:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        
+    index_path = os.path.join(base_dir, "index.html")
+    
+    if not os.path.exists(index_path):
+        raise HTTPException(status_code=404, detail="index.html não encontrado.")
+    return FileResponse(index_path)
+
+@app.post("/api/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    target_format: str = Form(None),
+    csv_delimiter: str = Form(";")
+):
+    """
+    Recebe o arquivo carregado, salva-o temporariamente em uma pasta local 'temp_uploads',
+    processa a conversão offline usando o motor local e retorna o arquivo convertido ou link.
+    """
+    temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_uploads")
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    # Salva o arquivo original localmente
+    input_path = os.path.join(temp_dir, file.filename)
+    try:
+        with open(input_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Falha ao salvar o arquivo enviado: {str(e)}"}
+        )
+
+    # Se não foi fornecido formato de destino, apenas retorna informações do arquivo
+    if not target_format:
+        ext_origem = os.path.splitext(file.filename)[1].lower()
+        saidas = obter_saidas_permitidas(input_path)
+        return {
+            "status": "success",
+            "filename": file.filename,
+            "size": len(content),
+            "allowed_targets": saidas
+        }
+
+    # Se foi fornecido um formato de destino, executa a conversão real offline!
+    name, ext = os.path.splitext(file.filename)
+    output_filename = f"{name}_convertido{target_format}"
+    output_path = os.path.join(temp_dir, output_filename)
+
+    try:
+        converter_arquivo(input_path, output_path, delimitador=csv_delimiter)
+        # Retorna sucesso e o caminho/url do arquivo convertido
+        return {
+            "status": "success",
+            "filename": file.filename,
+            "converted_filename": output_filename,
+            "message": "Conversão realizada com sucesso 100% offline!"
+        }
+    except ConversionError as ce:
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": f"Erro de Conversão: {str(ce)}"}
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Erro inesperado no servidor: {str(e)}"}
+        )
+
+@app.get("/api/download/{filename}")
+def download_file(filename: str):
+    """
+    Permite baixar o arquivo convertido a partir da pasta temporária local.
+    """
+    temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_uploads")
+    file_path = os.path.join(temp_dir, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Arquivo não encontrado no servidor local.")
+    return FileResponse(file_path, filename=filename)
+
+def remover_arquivos_temporarios(*caminhos: str):
+    """
+    Remove arquivos temporários locais para evitar o acúmulo de arquivos em disco.
+    """
+    time.sleep(1.0)
+    for caminho in caminhos:
+        try:
+            if os.path.exists(caminho):
+                os.remove(caminho)
+        except Exception:
+            pass
+
+@app.post("/api/converter")
+async def convert_file_stream(
+    background_tasks: BackgroundTasks,
+    files: List[UploadFile] = File(...),
+    acao: str = Form("Converter Formato"),
+    formato_saida: str = Form(None),
+    senha: str = Form(None),
+    csv_delimiter: str = Form(";")
+):
+    temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_uploads")
+    os.makedirs(temp_dir, exist_ok=True)
+
+    input_paths = []
+    for file in files:
+        ipath = os.path.join(temp_dir, file.filename)
+        try:
+            with open(ipath, "wb") as f:
+                content = await file.read()
+                f.write(content)
+            input_paths.append(ipath)
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"status": "error", "message": f"Erro ao receber arquivo temporário: {str(e)}"}
+            )
+
+    loop = asyncio.get_running_loop()
+
+    try:
+        if acao == "Juntar PDFs":
+            output_filename = "pdfs_juntos.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, juntar_pdfs, input_paths, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
+            
+        elif acao == "Dividir PDF":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            dir_saida = os.path.join(temp_dir, f"{name}_dividido")
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, dividir_pdf, input_path, dir_saida)
+            
+            zip_base = os.path.join(temp_dir, f"{name}_dividido")
+            shutil.make_archive(zip_base, 'zip', dir_saida)
+            output_path = f"{zip_base}.zip"
+            output_filename = os.path.basename(output_path)
+            
+            shutil.rmtree(dir_saida, ignore_errors=True)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+            
+        elif acao == "Proteger PDF":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_protegido.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, proteger_pdf, input_path, output_path, senha)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+            
+        elif acao == "Desbloquear PDF":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_desbloqueado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, desbloquear_pdf, input_path, output_path, senha)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+            
+        elif acao == "Imagens para PDF":
+            output_filename = "imagens_juntas.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, imagens_para_pdf, input_paths, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
+            
+        elif acao == "PDF para Imagens":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            dir_saida = os.path.join(temp_dir, f"{name}_imagens")
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, pdf_para_imagens, input_path, dir_saida, "png")
+            
+            zip_base = os.path.join(temp_dir, f"{name}_imagens")
+            shutil.make_archive(zip_base, 'zip', dir_saida)
+            output_path = f"{zip_base}.zip"
+            output_filename = os.path.basename(output_path)
+            
+            shutil.rmtree(dir_saida, ignore_errors=True)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+            
+        else:
+            input_path = input_paths[0]
+            name, ext = os.path.splitext(os.path.basename(input_path))
+            output_filename = f"{name}_convertido{formato_saida}"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, converter_arquivo, input_path, output_path, csv_delimiter)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        return FileResponse(
+            path=output_path,
+            filename=output_filename,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename={output_filename}"}
+        )
+    except ConversionError as ce:
+        background_tasks.add_task(remover_arquivos_temporarios, *input_paths)
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": f"Erro de processamento: {str(ce)}"}
+        )
+    except Exception as e:
+        background_tasks.add_task(remover_arquivos_temporarios, *input_paths)
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Erro interno no servidor: {str(e)}"}
+        )
+
+def start_browser():
+    # Aguarda 1.5 segundos para garantir que o FastAPI esteja totalmente inicializado
+    time.sleep(1.5)
+    webbrowser.open("http://127.0.0.1:8080")
+
+if __name__ == "__main__":
+    # Inicia a thread que abrirá o navegador
+    threading.Thread(target=start_browser, daemon=True).start()
+    
+    # Inicia o servidor local FastAPI via Uvicorn
+    uvicorn.run("server:app", host="127.0.0.1", port=8080, reload=True)

@@ -1,0 +1,22 @@
+# Ambientes Virtuais
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Temporários da Aplicação
+temp_uploads/
+*.zip
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
