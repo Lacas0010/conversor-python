@@ -170,22 +170,34 @@ def converter_imagem(origem: str, destino: str) -> None:
         raise ConversionError(f"Erro no motor Pillow ao processar a imagem: {str(e)}")
 
 def converter_midia_ffmpeg(origem: str, destino: str) -> None:
-    ffmpeg_exec = shutil.which("ffmpeg")
-    if not ffmpeg_exec:
-        raise ConversionError(
-            "O motor de conversão FFmpeg não foi encontrado no sistema.\n"
-            "Instale o FFmpeg localmente e adicione-o ao PATH."
-        )
+    # Apontando para a pasta bin que você vai copiar
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    ffmpeg_exec = os.path.join(base_path, "ffmpeg_bin", "ffmpeg.exe")
+    
+    if not os.path.exists(ffmpeg_exec):
+        raise ConversionError(f"FFmpeg não encontrado em {ffmpeg_exec}")
 
     try:
+        # Força o uso de aspas em todos os caminhos para evitar erro de espaço no nome
         cmd = [ffmpeg_exec, "-i", origem, destino, "-y"]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        # Se for MP3, aplica as flags de áudio que definimos
+        if destino.lower().endswith(".mp3"):
+            cmd = [ffmpeg_exec, "-i", origem, "-vn", "-acodec", "libmp3lame", "-q:a", "2", destino, "-y"]
+
+        print(f"[DEBUG] Executando FFmpeg: {' '.join(cmd)}")
+        
+        # Executa capturando a saída para vermos o erro real no seu terminal
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
         if result.returncode != 0:
-            raise ConversionError(f"FFmpeg retornou código de erro: {result.stderr.strip()}")
+            # Aqui está o segredo: vamos ver o erro real que o FFmpeg está cuspindo
+            raise ConversionError(f"Erro do FFmpeg (Código {result.returncode}): {result.stderr.strip()}")
+            
     except Exception as e:
         if isinstance(e, ConversionError):
             raise e
-        raise ConversionError(f"Erro inesperado ao invocar o FFmpeg: {str(e)}")
+        raise ConversionError(f"Erro ao chamar FFmpeg: {str(e)}")
 
 def converter_dados(origem: str, destino: str, delimitador: str = ";") -> None:
     try:

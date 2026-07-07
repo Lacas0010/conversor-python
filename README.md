@@ -22,6 +22,9 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 
 Você tem duas formas de rodar a aplicação:
 
+**⚠️ Pré-requisito de Mídia (FFmpeg)**
+Para realizar conversões de áudio e vídeo (como extração de MP3), o motor necessita do executável do FFmpeg. Crie uma pasta chamada `ffmpeg_bin` na raiz do projeto (no mesmo nível do `server.py`) e coloque o `ffmpeg.exe` dentro dela. Caso contrário, o motor tentará buscar uma instalação global no PATH do Windows.
+
 ### Opção 1: Via Python Script (Desenvolvimento)
 1. Instale as dependências:
    ```bash
@@ -55,6 +58,7 @@ conversor python/
 ├── server.py             # Servidor Backend (FastAPI, WebSockets, Rotas)
 ├── conversor_motor.py    # Cérebro de conversões e manipulação de arquivos
 ├── requirements.txt      # Lista de dependências Python
+├── ffmpeg_bin/           # (Opcional) Pasta contendo o ffmpeg.exe para mídias
 ├── temp_uploads/         # Diretório criado automaticamente para processamento local
 └── dist/                 # Diretório criado ao compilar o .exe final
 ```

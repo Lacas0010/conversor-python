@@ -19,6 +19,12 @@ from conversor_motor import (
     pdf_para_imagens, imagens_para_pdf
 )
 
+# --- CONFIGURAÇÃO FFMPEG PARA O PYINSTALLER ---
+# No início do server.py, defina isso:
+ffmpeg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ffmpeg.exe")
+os.environ["FFMPEG_PATH"] = ffmpeg_path
+# ----------------------------------------------
+
 app = FastAPI(title="Conversor de Arquivos - Web Interface")
 
 active_websockets = []

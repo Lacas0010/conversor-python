@@ -17,6 +17,9 @@ dist/
 temp_uploads/
 *.zip
 
+# Binários de Terceiros
+ffmpeg_bin/
+
 # Sistema Operacional
 .DS_Store
 Thumbs.db
