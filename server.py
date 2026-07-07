@@ -288,8 +288,17 @@ def start_browser():
     webbrowser.open("http://127.0.0.1:8080")
 
 if __name__ == "__main__":
+    # --- CORREÇÃO PARA O PYINSTALLER NOCONSOLE ---
+    # Se não houver console, redirecionamos a saída para o "limbo" (devnull)
+    # para evitar que o log colorido do Uvicorn quebre a aplicação.
+    if sys.stdout is None:
+        sys.stdout = open(os.devnull, "w")
+    if sys.stderr is None:
+        sys.stderr = open(os.devnull, "w")
+    # ---------------------------------------------
+
     # Inicia a thread que abrirá o navegador
     threading.Thread(target=start_browser, daemon=True).start()
     
-    # Inicia o servidor local FastAPI via Uvicorn
-    uvicorn.run("server:app", host="127.0.0.1", port=8080, reload=True)
+    # Inicia o servidor local FastAPI via Uvicorn (SEM ASPAS E SEM RELOAD)
+    uvicorn.run(app, host="127.0.0.1", port=8080)
