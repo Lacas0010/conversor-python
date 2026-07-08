@@ -12,6 +12,9 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
+last_heartbeat = time.time()
+server_started = False
+
 # Adiciona o diretório atual ao path para importar o motor
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from conversor_motor import (
@@ -158,6 +161,13 @@ def download_file(filename: str):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Arquivo não encontrado no servidor local.")
     return FileResponse(file_path, filename=filename)
+
+@app.post("/api/heartbeat")
+def heartbeat():
+    global last_heartbeat, server_started
+    last_heartbeat = time.time()
+    server_started = True
+    return {"status": "ok"}
 
 def remover_arquivos_temporarios(*caminhos: str):
     """
@@ -333,6 +343,20 @@ def start_browser():
     time.sleep(1.5)
     webbrowser.open("http://127.0.0.1:8080")
 
+def monitor_heartbeat():
+    global last_heartbeat, server_started
+    start_time = time.time()
+    while True:
+        time.sleep(2)
+        now = time.time()
+        if getattr(sys, 'frozen', False):  # Apenas desliga sozinho se for .exe
+            if not server_started:
+                if now - start_time > 30: # 30s sem abrir o navegador
+                    os._exit(0)
+            else:
+                if now - last_heartbeat > 5: # 5s sem heartbeat (navegador fechado)
+                    os._exit(0)
+
 if __name__ == "__main__":
     # --- CORREÇÃO PARA O PYINSTALLER NOCONSOLE ---
     # Se não houver console, redirecionamos a saída para o "limbo" (devnull)
@@ -345,6 +369,9 @@ if __name__ == "__main__":
 
     # Inicia a thread que abrirá o navegador
     threading.Thread(target=start_browser, daemon=True).start()
+    
+    # Inicia o monitor de heartbeat para fechar quando o navegador for fechado
+    threading.Thread(target=monitor_heartbeat, daemon=True).start()
     
     # Inicia o servidor local FastAPI via Uvicorn (SEM ASPAS E SEM RELOAD)
     uvicorn.run(app, host="127.0.0.1", port=8080)
