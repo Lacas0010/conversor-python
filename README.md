@@ -1,5 +1,3 @@
-faz
-
 # Conversor de Arquivos - Universal & Offline
 
 Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **FastAPI**, **Vanilla JS** (Material Design 3) e **PyMuPDF**. Ela serve como um canivete suíço para arquivos, oferecendo ferramentas para manipulação avançada de PDFs, extração de planilhas e conversões de formatos — tudo diretamente no seu navegador, mas rodando inteiramente na sua própria máquina local, sem enviar dados para a internet.
@@ -53,9 +51,17 @@ O projeto está preparado para ser empacotado num executável standalone.
    ```
 2. Compile o código:
    ```bash
-   pyinstaller --name "Conversor_Universal" --onefile --noconsole --icon="app_icon.ico" --add-data "index.html;." --add-data "logo.svg;." --add-data "ffmpeg_bin;ffmpeg_bin/" --add-data "Tesseract-OCR;Tesseract-OCR/" --hidden-import="fastapi" --hidden-import="uvicorn" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan.on" server.py
+   pyinstaller --name "Conversor_Universal" --onefile --noconsole --icon="app_icon.ico" --add-data "index.html;." --add-data "logo.svg;." --add-data "app_icon.ico;." --add-data "ffmpeg_bin;ffmpeg_bin/" --add-data "Tesseract-OCR;Tesseract-OCR/" --hidden-import="fastapi" --hidden-import="uvicorn" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan.on" server.py
    ```
 3. Acesse a pasta `dist` recém-criada e dê um clique duplo no `Conversor_Universal.exe`.
+
+---
+
+## ⚡ Arquitetura e Recursos Avançados
+
+- **Encerramento Inteligente (Heartbeat):** Ao rodar via executável, o backend possui uma conexão WebSocket contínua com a aba do navegador. Quando o usuário fecha a aba, o servidor detecta a desconexão e encerra o processo do Python na hora de forma segura.
+- **Glassmorphism & Material Design 3:** A interface `index.html` foi totalmente reescrita em Vanilla JS sem frameworks pesados, aplicando um design luxuoso, modo noturno dinâmico e micro-interações fluidas.
+- **Log em Tempo Real:** As saídas do backend são transmitidas via WebSocket diretamente para a UI, permitindo visualizar logs do motor de processamento no próprio navegador.
 
 ---
 
