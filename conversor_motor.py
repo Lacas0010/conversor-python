@@ -187,8 +187,13 @@ def converter_midia_ffmpeg(origem: str, destino: str) -> None:
 
         print(f"[DEBUG] Executando FFmpeg: {' '.join(cmd)}")
         
+        # Prepara argumentos para ocultar a janela do console no Windows
+        run_kwargs = {'capture_output': True, 'text': True}
+        if os.name == 'nt':
+            run_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
         # Executa capturando a saída para vermos o erro real no seu terminal
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, **run_kwargs)
         
         if result.returncode != 0:
             # Aqui está o segredo: vamos ver o erro real que o FFmpeg está cuspindo
@@ -722,7 +727,186 @@ def desbloquear_pdf(caminho_origem: str, caminho_saida: str, senha: str) -> None
         print(f"[ERROR] Falha ao desbloquear PDF: {str(e)}")
         raise ConversionError(f"Falha ao desbloquear PDF: {str(e)}")
 
-# 8. Interface de Linha de Comando (CLI) para Testes
+# 8. Funções Extras de Processamento
+def extrair_tabelas_pdf(origem: str, destino: str) -> None:
+    try:
+        import pdfplumber
+        import pandas as pd
+    except ImportError:
+        raise ConversionError("As bibliotecas 'pdfplumber' e 'pandas' são necessárias para extrair tabelas de PDF.")
+
+    try:
+        print(f"[INFO] Extraindo tabelas de: {origem}")
+        todas_tabelas = []
+        with pdfplumber.open(origem) as pdf:
+            for page in pdf.pages:
+                tabelas_pagina = page.extract_tables()
+                for tabela in tabelas_pagina:
+                    if tabela:
+                        df = pd.DataFrame(tabela[1:], columns=tabela[0])
+                        todas_tabelas.append(df)
+        
+        if not todas_tabelas:
+            raise ConversionError("Nenhuma tabela legível encontrada no PDF.")
+            
+        df_final = pd.concat(todas_tabelas, ignore_index=True)
+        
+        ext_destino = os.path.splitext(destino)[1].lower()
+        if ext_destino == ".xlsx":
+            df_final.to_excel(destino, index=False)
+        elif ext_destino in [".csv", ".tsv"]:
+            df_final.to_csv(destino, index=False, sep=";")
+        else:
+            raise ConversionError(f"Formato de destino para tabelas não suportado: {ext_destino}. Use .xlsx ou .csv.")
+            
+        print(f"[INFO] Tabelas extraídas e salvas em: {destino}")
+    except Exception as e:
+        if isinstance(e, ConversionError):
+            raise e
+        raise ConversionError(f"Falha ao extrair tabelas do PDF: {str(e)}")
+
+def sanitizar_arquivo(origem: str, destino: str) -> None:
+    ext_origem = os.path.splitext(origem)[1].lower()
+    try:
+        if ext_origem == ".pdf":
+            import fitz
+            print(f"[INFO] Sanitizando PDF (zerando metadados): {origem}")
+            doc = fitz.open(origem)
+            doc.set_metadata({})
+            doc.save(destino)
+            doc.close()
+        elif ext_origem in [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff"]:
+            from PIL import Image
+            print(f"[INFO] Sanitizando imagem (removendo EXIF): {origem}")
+            with Image.open(origem) as img:
+                dados_limpos = list(img.getdata())
+                img_sem_exif = Image.new(img.mode, img.size)
+                img_sem_exif.putdata(dados_limpos)
+                img_sem_exif.save(destino)
+        else:
+            raise ConversionError(f"Formato não suportado para sanitização: {ext_origem}")
+        print(f"[INFO] Arquivo sanitizado salvo em: {destino}")
+    except Exception as e:
+        if isinstance(e, ConversionError):
+            raise e
+        raise ConversionError(f"Falha ao sanitizar arquivo: {str(e)}")
+
+def comprimir_arquivo(origem: str, destino: str) -> None:
+    ext_origem = os.path.splitext(origem)[1].lower()
+    try:
+        if ext_origem == ".pdf":
+            import fitz
+            print(f"[INFO] Comprimindo PDF: {origem}")
+            doc = fitz.open(origem)
+            doc.save(destino, garbage=4, deflate=True, clean=True)
+            doc.close()
+        elif ext_origem in [".mp4", ".mkv", ".webm", ".avi", ".mov", ".wmv", ".ts"]:
+            print(f"[INFO] Comprimindo vídeo: {origem}")
+            import sys
+            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+            ffmpeg_exec = os.path.join(base_path, "ffmpeg_bin", "ffmpeg.exe")
+            if not os.path.exists(ffmpeg_exec):
+                ffmpeg_exec = "ffmpeg"
+                
+            cmd = [
+                ffmpeg_exec, "-i", origem,
+                "-vcodec", "libx264", "-crf", "28", "-preset", "fast",
+                "-y", destino
+            ]
+            run_kwargs = {'capture_output': True, 'text': True}
+            if os.name == 'nt':
+                run_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+                
+            result = subprocess.run(cmd, **run_kwargs)
+            if result.returncode != 0:
+                raise ConversionError(f"Erro do FFmpeg (Código {result.returncode}): {result.stderr.strip()}")
+        else:
+            raise ConversionError(f"Formato não suportado para compressão: {ext_origem}")
+        print(f"[INFO] Arquivo comprimido salvo em: {destino}")
+    except Exception as e:
+        if isinstance(e, ConversionError):
+            raise e
+        raise ConversionError(f"Falha ao comprimir arquivo: {str(e)}")
+
+def ocr_documento(origem: str, destino: str) -> None:
+    try:
+        import pytesseract
+        from PIL import Image
+        import sys
+        import io
+        import os
+        
+        # Aponta para o Tesseract local que você incluiu
+        base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+        tesseract_cmd = os.path.join(base_path, "Tesseract-OCR", "tesseract.exe")
+        
+        if os.path.exists(tesseract_cmd):
+            pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+
+        ext_origem = os.path.splitext(origem)[1].lower()
+        ext_destino = os.path.splitext(destino)[1].lower()
+        texto_extraido = ""
+        
+        # Função interna à prova de falhas para o pacote de idioma
+        def extrair_texto(img_obj):
+            try:
+                # Tenta ler em Português primeiro
+                return pytesseract.image_to_string(img_obj, lang="por")
+            except pytesseract.TesseractError:
+                print("[WARNING] Idioma 'por' não encontrado no Tesseract. Usando o padrão.")
+                return pytesseract.image_to_string(img_obj)
+        
+        # --- A MÁGICA ACONTECE AQUI ---
+        if ext_origem == ".pdf":
+            import fitz
+            print(f"[INFO] Fatiando PDF para leitura óptica: {origem}")
+            doc = fitz.open(origem)
+            for i, page in enumerate(doc):
+                print(f"[INFO] Lendo texto da página {i+1}/{len(doc)}...")
+                # dpi=300 garante altíssima resolução para o Tesseract não errar letras
+                pix = page.get_pixmap(dpi=300)
+                img_data = pix.tobytes("png")
+                img = Image.open(io.BytesIO(img_data))
+                texto_extraido += extrair_texto(img) + "\n\n"
+            doc.close()
+        elif ext_origem in [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"]:
+            print(f"[INFO] Realizando OCR na imagem: {origem}")
+            with Image.open(origem) as img:
+                texto_extraido = extrair_texto(img)
+        else:
+            raise ConversionError(f"Formato não suportado para OCR: {ext_origem}")
+            
+        print(f"[INFO] Gerando arquivo de saída textual: {destino}")
+        
+        if ext_destino == ".docx":
+            try:
+                import docx
+            except ImportError:
+                raise ConversionError("A biblioteca 'python-docx' é necessária para salvar em DOCX.")
+            
+            documento = docx.Document()
+            documento.add_heading('Texto Extraído via OCR', 0)
+            
+            # Adiciona o texto preservando parágrafos e quebras de linha
+            for paragrafo in texto_extraido.split('\n'):
+                if paragrafo.strip():
+                    documento.add_paragraph(paragrafo.strip())
+                    
+            documento.save(destino)
+        else:
+            # Fallback seguro para bloco de notas (.txt)
+            if not destino.endswith(".txt"):
+                destino = os.path.splitext(destino)[0] + ".txt"
+            with open(destino, "w", encoding="utf-8") as f:
+                f.write(texto_extraido)
+            
+        print(f"[INFO] OCR concluído com sucesso. Salvo em: {destino}")
+    except Exception as e:
+        if isinstance(e, ConversionError):
+            raise e
+        raise ConversionError(f"Falha ao realizar OCR: {str(e)}")
+
+# 9. Interface de Linha de Comando (CLI) para Testes
 if __name__ == "__main__":
     import argparse
     import sys

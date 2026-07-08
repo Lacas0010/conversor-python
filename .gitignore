@@ -19,6 +19,7 @@ temp_uploads/
 
 # Binários de Terceiros
 ffmpeg_bin/
+Tesseract-OCR/
 
 # Sistema Operacional
 .DS_Store

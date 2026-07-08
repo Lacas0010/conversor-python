@@ -17,7 +17,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from conversor_motor import (
     converter_arquivo, obter_saidas_permitidas, ConversionError,
     juntar_pdfs, dividir_pdf, proteger_pdf, desbloquear_pdf,
-    pdf_para_imagens, imagens_para_pdf
+    pdf_para_imagens, imagens_para_pdf,
+    extrair_tabelas_pdf, sanitizar_arquivo, comprimir_arquivo, ocr_documento
 )
 
 # --- CONFIGURAÇÃO FFMPEG PARA O PYINSTALLER ---
@@ -259,6 +260,44 @@ async def convert_file_stream(
             output_filename = os.path.basename(output_path)
             
             shutil.rmtree(dir_saida, ignore_errors=True)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+            
+        elif acao == "Extrair Tabelas (PDF)":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            ext_saida = formato_saida if formato_saida else ".xlsx"
+            output_filename = f"{name}_tabelas{ext_saida}"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, extrair_tabelas_pdf, input_path, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Sanitizar Arquivo":
+            input_path = input_paths[0]
+            name, ext = os.path.splitext(os.path.basename(input_path))
+            output_filename = f"{name}_sanitizado{ext}"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, sanitizar_arquivo, input_path, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Comprimir Arquivo":
+            input_path = input_paths[0]
+            name, ext = os.path.splitext(os.path.basename(input_path))
+            output_filename = f"{name}_comprimido{ext}"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, comprimir_arquivo, input_path, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Reconhecimento OCR":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            ext_saida = formato_saida if formato_saida else ".txt"
+            output_filename = f"{name}_ocr{ext_saida}"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, ocr_documento, input_path, output_path)
             background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
             
         else:

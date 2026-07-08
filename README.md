@@ -15,6 +15,10 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 4. **Imagens para PDF**: Empacote uma série de fotos (JPG, PNG) em um arquivo PDF multipágina em questão de segundos.
 5. **PDF para Imagens**: Extraia imagens em alta qualidade das páginas do seu documento.
 6. **Segurança de PDF**: Aplique ou quebre senhas (Criptografia AES-256) para proteger arquivos sigilosos.
+7. **Extração de Tabelas (PDF)**: Transforme tabelas nativas dentro de PDFs em planilhas Excel estruturadas automaticamente.
+8. **Sanitização de Arquivos**: Limpe todo e qualquer metadado ou rastro de PDFs e Imagens, garantindo privacidade militar antes do envio.
+9. **Compressão Otimizada**: Reduza massivamente o peso de PDFs e vídeos através do motor otimizado de deflate interno.
+10. **Reconhecimento OCR Avançado**: Leia o texto contido em PDFs escaneados ou imagens e transforme num documento `.docx` usando Tesseract.
 
 ---
 
@@ -26,6 +30,7 @@ Você tem duas formas de rodar a aplicação:
 Para realizar conversões de áudio e vídeo (como extração de MP3), o motor necessita do executável do FFmpeg. Crie uma pasta chamada `ffmpeg_bin` na raiz do projeto (no mesmo nível do `server.py`) e coloque o `ffmpeg.exe` dentro dela. Caso contrário, o motor tentará buscar uma instalação global no PATH do Windows.
 
 ### Opção 1: Via Python Script (Desenvolvimento)
+
 1. Instale as dependências:
    ```bash
    pip install -r requirements.txt
@@ -37,14 +42,16 @@ Para realizar conversões de áudio e vídeo (como extração de MP3), o motor n
 3. O servidor abrirá automaticamente o seu navegador web no endereço local.
 
 ### Opção 2: Via Executável (Produção .exe)
+
 O projeto está preparado para ser empacotado num executável standalone.
+
 1. Instale o PyInstaller:
    ```bash
    pip install pyinstaller
    ```
 2. Compile o código:
    ```bash
-   pyinstaller --name "Conversor_Universal" --onefile --noconsole --add-data "index.html;." --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan.on" server.py
+   pyinstaller --name "Conversor_Universal" --onefile --noconsole --icon="app_icon.ico" --add-data "index.html;." --add-data "logo.svg;." --add-data "ffmpeg_bin;ffmpeg_bin/" --add-data "Tesseract-OCR;Tesseract-OCR/" --hidden-import="fastapi" --hidden-import="uvicorn" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan.on" server.py
    ```
 3. Acesse a pasta `dist` recém-criada e dê um clique duplo no `Conversor_Universal.exe`.
 
@@ -58,7 +65,8 @@ conversor python/
 ├── server.py             # Servidor Backend (FastAPI, WebSockets, Rotas)
 ├── conversor_motor.py    # Cérebro de conversões e manipulação de arquivos
 ├── requirements.txt      # Lista de dependências Python
-├── ffmpeg_bin/           # (Opcional) Pasta contendo o ffmpeg.exe para mídias
+├── ffmpeg_bin/           # (Opcional) Pasta contendo o ffmpeg.exe para compressão de mídias
+├── Tesseract-OCR/        # (Opcional) Pasta contendo o Tesseract para reconhecimento OCR
 ├── temp_uploads/         # Diretório criado automaticamente para processamento local
 └── dist/                 # Diretório criado ao compilar o .exe final
 ```

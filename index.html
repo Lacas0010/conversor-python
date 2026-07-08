@@ -11,274 +11,448 @@
     
     <!-- Material Web Components module -->
     <script type="module" src="https://esm.run/@material/web/all.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     
     <style>
-        :root {
-            --md-sys-color-background: #141218;
-            --md-sys-color-on-background: #E6E0E9;
-            --md-sys-color-surface: #141218;
-            --md-sys-color-on-surface: #E6E0E9;
-            --md-sys-color-surface-container-low: #1D1B20;
-            --md-sys-color-surface-container: #211F26;
-            --md-sys-color-surface-container-high: #2B2930;
-            --md-sys-color-surface-variant: #49454F;
-            --md-sys-color-on-surface-variant: #CAC4D0;
-            --md-sys-color-primary: #A8C7FA;
-            --md-sys-color-on-primary: #062E6F;
-            --md-sys-color-outline: #938F99;
-            --md-sys-color-error: #F2B8B5;
-            --md-sys-color-on-error: #601410;
+        * {
+            box-sizing: border-box;
+            --md-sys-shape-corner-extra-large: 24px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-small: 8px;
+            --md-filled-button-container-shape: 16px;
+            --md-outlined-text-field-container-shape: 12px;
+            --md-outlined-select-container-shape: 12px;
         }
 
-        [data-theme="light"] {
-            --md-sys-color-background: #FEF7FF;
-            --md-sys-color-on-background: #1D1B20;
-            --md-sys-color-surface: #FEF7FF;
-            --md-sys-color-on-surface: #1D1B20;
-            --md-sys-color-surface-container-low: #F7F2FA;
-            --md-sys-color-surface-container: #F3EDF7;
-            --md-sys-color-surface-container-high: #ECE6F0;
-            --md-sys-color-surface-variant: #E7E0EC;
-            --md-sys-color-on-surface-variant: #49454F;
-            --md-sys-color-primary: #005AC1;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-outline: #79747E;
-            --md-sys-color-error: #B3261E;
-            --md-sys-color-on-error: #FFFFFF;
+        :root {
+            /* Hyper-Glass Palette */
+            --bg-base: #050508;
+            --glass-bg: rgba(20, 20, 24, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-highlight: rgba(255, 255, 255, 0.1);
+            
+            --md-sys-color-background: transparent;
+            --md-sys-color-on-background: #f8fafc;
+            --md-sys-color-surface: var(--glass-bg);
+            --md-sys-color-on-surface: #f8fafc;
+            --md-sys-color-surface-container-low: rgba(0, 0, 0, 0.2);
+            --md-sys-color-surface-container: var(--glass-bg);
+            --md-sys-color-surface-container-high: rgba(255, 255, 255, 0.05);
+            --md-sys-color-surface-variant: rgba(255, 255, 255, 0.03);
+            --md-sys-color-on-surface-variant: #94a3b8;
+            --md-sys-color-primary: #38bdf8;
+            --md-sys-color-on-primary: #020617;
+            --md-sys-color-outline: rgba(255, 255, 255, 0.15);
+            --md-sys-color-error: #f43f5e;
+            --md-sys-color-on-error: #ffffff;
+            
+            --glow-primary: rgba(56, 189, 248, 0.3);
+            --glow-secondary: rgba(168, 85, 247, 0.25);
+            --glow-accent: rgba(236, 72, 153, 0.2);
         }
+        :root.light-theme {
+                --bg-base: #f1f5f9;
+                --glass-bg: rgba(255, 255, 255, 0.6);
+                --glass-border: rgba(0, 0, 0, 0.1);
+                --glass-highlight: rgba(0, 0, 0, 0.05);
+                
+                --md-sys-color-on-background: #0f172a;
+                --md-sys-color-surface: var(--glass-bg);
+                --md-sys-color-on-surface: #0f172a;
+                --md-sys-color-surface-container-low: rgba(255, 255, 255, 0.8);
+                --md-sys-color-surface-container: var(--glass-bg);
+                --md-sys-color-surface-container-high: rgba(0, 0, 0, 0.08);
+                --md-sys-color-surface-variant: rgba(0, 0, 0, 0.05);
+                --md-sys-color-on-surface-variant: #475569;
+                --md-sys-color-primary: #0284c7;
+                --md-sys-color-on-primary: #ffffff;
+                --md-sys-color-outline: rgba(0, 0, 0, 0.2);
+                
+                --glow-primary: rgba(2, 132, 199, 0.15);
+                --glow-secondary: rgba(147, 51, 234, 0.12);
+                --glow-accent: rgba(219, 39, 119, 0.1);
+            }
+
 
         body {
-            background-color: var(--md-sys-color-background);
+            background-color: var(--bg-base);
             color: var(--md-sys-color-on-background);
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Inter', 'Segoe UI Variable', 'Segoe UI', 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            display: flex;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
+            position: relative;
         }
 
-        /* Navigation Rail Sidebar */
+        /* Ambient Orbs */
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.8;
+            z-index: 0;
+            animation: float 20s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, var(--glow-primary) 0%, transparent 70%);
+            top: -200px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--glow-secondary) 0%, transparent 70%);
+            bottom: -300px;
+            right: -100px;
+            animation-delay: -10s;
+        }
+
+        .orb-3 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--glow-accent) 0%, transparent 70%);
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-duration: 25s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, -60px) scale(1.1); }
+        }
+
+        /* App Container */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 1; /* Above orbs */
+            padding: 24px;
+            gap: 24px;
+            box-sizing: border-box;
+        }
+
+        /* Floating Sidebar */
         .navigation-rail {
             width: 80px;
-            height: 100vh;
-            background-color: var(--md-sys-color-surface-container-low);
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 24px 0;
-            box-sizing: border-box;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 32px 0;
             flex-shrink: 0;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+            height: 100%;
         }
 
-        .rail-header .logo {
-            font-weight: 700;
-            font-size: 20px;
-            color: var(--md-sys-color-primary);
-            letter-spacing: 1px;
+        .app-logo {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.6));
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .app-logo:hover {
+            transform: scale(1.15) rotate(-10deg);
         }
 
         .rail-items {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
         .rail-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 28px; /* Circular M3 */
-            border: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px; 
+            border: 1px solid transparent;
             background-color: transparent;
             color: var(--md-sys-color-on-surface-variant);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s, color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .rail-btn span {
             font-family: 'Material Symbols Outlined';
-            font-size: 24px;
+            font-size: 26px;
         }
 
         .rail-btn:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: var(--glass-highlight);
             color: var(--md-sys-color-on-surface);
+            transform: translateY(-2px);
         }
 
         .rail-btn.active {
-            background-color: #4A4458;
-            color: #E8DEF8;
+            background-color: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 16px;
+            color: var(--md-sys-color-primary);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2), inset 0 0 12px rgba(56, 189, 248, 0.1);
         }
 
         .rail-footer span {
             font-family: 'Material Symbols Outlined';
             font-size: 24px;
-            color: #10b981; /* Emerald active green */
+            color: #34d399;
+            text-shadow: 0 0 16px rgba(52, 211, 153, 0.5);
         }
 
         /* Main Content Panel */
         .main-content {
             flex: 1;
-            height: 100vh;
-            overflow-y: auto;
-            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-width: 0; 
+            height: 100%;
         }
 
         .container {
-            max-width: 1000px;
-            margin: 5vh auto 40px auto;
-            padding: 0 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            width: 100%;
+            height: 100%;
         }
 
         /* SPA Views Management */
-        .view {
-            display: none;
+        .view { display: none; height: 100%; }
+        .view.active { display: flex; flex-direction: column; animation: fadeInScale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        .view.active {
-            display: block;
-            animation: fadeIn 0.25s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Dashboard and General Cards */
         .dashboard-card {
-            background-color: var(--md-sys-color-surface-container);
-            border-radius: 28px; /* M3 Extra Large */
-            padding: 32px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
-            box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            margin-bottom: 24px;
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
-        .dashboard-card h2 {
-            font-size: 24px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
-            margin: 0 0 16px 0;
+        header {
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         header h1 {
-            font-size: 28px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #38bdf8, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin: 0 0 8px 0;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
+            letter-spacing: -1px;
         }
 
         header h1 span.icon {
             font-family: 'Material Symbols Outlined';
-            font-size: 32px;
+            font-size: 40px;
+            background: none;
+            -webkit-text-fill-color: initial;
             color: var(--md-sys-color-primary);
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
         }
 
         header p {
-            font-size: 14px;
+            font-size: 16px;
             color: var(--md-sys-color-on-surface-variant);
-            margin: 0 0 28px 0;
+            margin: 0;
         }
 
-        /* Dropzone (Surface Variant background) */
+        /* Workspace & Inspector Split Layout */
+        .app-split-layout {
+            display: flex;
+            gap: 24px;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .workspace-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .workspace-pane::-webkit-scrollbar { width: 6px; }
+        .workspace-pane::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .inspector-pane {
+            width: 360px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Dropzone Gigante */
         .dropzone {
-            min-height: 220px;
+            flex: 1;
+            min-height: 300px;
             border: 2px dashed var(--md-sys-color-outline);
-            border-radius: 24px; /* M3 Large */
+            border-radius: 24px;
             background-color: var(--md-sys-color-surface-variant);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-            padding: 24px;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            padding: 40px;
             text-align: center;
-            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropzone::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at center, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
         }
 
         .dropzone:hover, .dropzone.dragover {
-            background-color: rgba(255, 255, 255, 0.08);
-            border-color: var(--md-sys-color-primary);
+            border-color: rgba(56, 189, 248, 0.5);
+            background-color: rgba(56, 189, 248, 0.05);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .dropzone:hover::before, .dropzone.dragover::before {
+            opacity: 1;
         }
 
         .dropzone span.upload-icon {
             font-family: 'Material Symbols Outlined';
-            font-size: 48px;
+            font-size: 64px;
             color: var(--md-sys-color-primary);
-            margin-bottom: 12px;
+            margin-bottom: 24px;
+            transition: transform 0.4s ease;
+        }
+
+        .dropzone:hover span.upload-icon {
+            transform: translateY(-8px) scale(1.1);
+            text-shadow: 0 0 32px rgba(56, 189, 248, 0.6);
         }
 
         .dropzone .primary-text {
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 20px;
+            font-weight: 600;
             color: var(--md-sys-color-on-surface);
-            margin-bottom: 4px;
+            margin-bottom: 12px;
+            position: relative;
         }
 
         .dropzone .secondary-text {
-            font-size: 12px;
+            font-size: 15px;
             color: var(--md-sys-color-on-surface-variant);
+            position: relative;
         }
 
-        /* File Queue (Batch selection chips) */
+        /* Fila de Arquivos: Chips Flutuantes */
         #file-queue {
-            margin-top: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 200px;
+            gap: 12px;
+            max-height: 300px;
             overflow-y: auto;
-            padding-right: 4px;
+            padding-right: 8px;
         }
+        
+        #file-queue::-webkit-scrollbar { width: 6px; }
+        #file-queue::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
         .queue-item {
-            background-color: var(--md-sys-color-surface-container-high);
+            background-color: var(--md-sys-color-surface-variant);
+            backdrop-filter: blur(20px);
             border-radius: 16px;
-            padding: 12px 16px;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .queue-item:hover {
+            background-color: var(--glass-highlight);
+            transform: translateY(-2px);
+            border-color: var(--glass-border);
         }
 
         .queue-item-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
             min-width: 0;
         }
 
         .queue-item-info span.file-icon {
             font-family: 'Material Symbols Outlined';
-            font-size: 24px;
-            color: var(--md-sys-color-primary);
+            font-size: 28px;
+            color: #a855f7;
+            text-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
         }
 
         .queue-item-meta {
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .queue-item-name {
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
             color: var(--md-sys-color-on-surface);
             overflow: hidden;
             text-overflow: ellipsis;
@@ -286,7 +460,7 @@
         }
 
         .queue-item-size {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--md-sys-color-on-surface-variant);
         }
 
@@ -298,64 +472,78 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 6px;
+            padding: 8px;
             border-radius: 50%;
             transition: background-color 0.2s;
         }
 
         .remove-icon-btn:hover {
-            background-color: rgba(242, 184, 181, 0.08);
+            background-color: rgba(244, 63, 94, 0.15);
+            color: #fb7185;
         }
 
         .remove-icon-btn span {
             font-family: 'Material Symbols Outlined';
-            font-size: 20px;
+            font-size: 22px;
         }
 
-        /* Config Grid (Horizontal Controls) */
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: var(--glass-highlight);
+            border: 2px dashed var(--md-sys-color-primary);
+        }
+
+        /* Config Controls */
         .config-bar {
             display: flex;
-            gap: 16px;
-            margin-top: 24px;
-            margin-bottom: 24px;
-            align-items: center;
+            flex-direction: column; 
+            gap: 20px;
+            margin: 0;
         }
 
-        .config-bar md-outlined-select {
-            flex: 2;
-            height: 56px;
-        }
-
+        .config-bar md-outlined-select,
         .config-bar md-outlined-text-field {
-            flex: 1;
-            height: 56px;
+            width: 100%; 
+            flex: none;
         }
 
         /* Progress Wrapper */
         .progress-wrapper {
             display: none;
             margin-bottom: 24px;
+            background: var(--md-sys-color-surface-container-low);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
         }
 
         .progress-label {
             font-size: 13px;
-            color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 8px;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 12px;
+            font-weight: 500;
         }
 
-        /* Action layout aligned right */
+        /* Action layout */
         .actions {
+            margin-top: auto; 
             display: flex;
-            justify-content: flex-end;
-            margin-top: 12px;
+            flex-direction: column;
         }
 
         .actions md-filled-button {
-            height: 48px;
-            min-width: 180px;
-            --md-filled-button-container-shape: 100px;
+            width: 100%; 
+            height: 64px;
             --md-filled-button-container-color: var(--md-sys-color-primary);
             --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
+            --md-filled-button-label-text-font: 'Inter';
+            box-shadow: 0 12px 24px rgba(56, 189, 248, 0.3);
+            transition: all 0.3s;
+        }
+
+        .actions md-filled-button:hover {
+            box-shadow: 0 16px 32px rgba(56, 189, 248, 0.5);
+            transform: translateY(-2px);
         }
 
         /* Hidden standard file input */
@@ -371,39 +559,13 @@
             margin-top: 24px;
             font-size: 14px;
             line-height: 1.5;
+            backdrop-filter: blur(10px);
         }
 
         .status-alert.success {
-            background-color: rgba(168, 199, 250, 0.12);
-            border: 1px solid var(--md-sys-color-primary);
-            color: var(--md-sys-color-primary);
-        }
-
-        .status-alert.error {
-            background-color: rgba(242, 184, 181, 0.12);
-            border: 1px solid var(--md-sys-color-error);
-            color: var(--md-sys-color-error);
-        }
-
-        .status-alert md-filled-button {
-            margin-top: 12px;
-            --md-filled-button-container-color: var(--md-sys-color-primary);
-            --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
-        }
-
-        /* Settings Styles */
-        .settings-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .settings-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            background-color: rgba(52, 211, 153, 0.15);
+            border: 1px solid #34d399;
+            color: #a7f3d0;
         }
 
         .settings-title {
@@ -419,7 +581,9 @@
 
         /* History styles */
         .history-list {
-            background-color: var(--md-sys-color-surface-container-high);
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 16px;
         }
@@ -428,8 +592,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .history-item:last-child {
@@ -439,23 +603,23 @@
         .history-meta {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .history-meta span.status-icon {
             font-family: 'Material Symbols Outlined';
-            font-size: 24px;
-            color: var(--md-sys-color-primary);
+            font-size: 28px;
+            color: #a855f7;
         }
 
         .history-details div.name {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
             color: var(--md-sys-color-on-surface);
         }
 
         .history-details div.date {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--md-sys-color-on-surface-variant);
         }
 
@@ -468,43 +632,50 @@
         }
 
         .dashboard-layout .dashboard-card {
-            min-width: 800px;
-            flex-shrink: 0;
+            flex: 1;
+            min-width: 0;
         }
 
         #terminal-container {
-            flex: 1;
-            background-color: #000000;
-            border-radius: 16px;
-            padding: 16px;
-            min-width: 300px;
-            max-width: 400px;
-            height: calc(100vh - 150px);
+            background-color: var(--md-sys-color-surface-container-low);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            width: 400px;
+            flex-shrink: 0;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.5);
         }
 
         #terminal-container h3 {
             margin-top: 0;
-            margin-bottom: 12px;
-            font-size: 14px;
+            margin-bottom: 16px;
+            font-size: 15px;
             color: var(--md-sys-color-on-surface-variant);
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         #terminal-output {
             flex: 1;
             overflow-y: auto;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 12px;
+            font-size: 13px;
             color: #4ADE80;
+            padding-right: 8px;
         }
+
+        #terminal-output::-webkit-scrollbar { width: 6px; }
+        #terminal-output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
         #terminal-output div {
             word-wrap: break-word;
             white-space: pre-wrap;
-            line-height: 1.5;
+            line-height: 1.6;
             margin-bottom: 4px;
         }
 
@@ -512,18 +683,24 @@
             display: none !important;
         }
 
-        .log-info { color: #4ADE80; }
-        .log-warning { color: #FBBF24; }
-        .log-error { color: #F87171; }
-        .log-neutral { color: #94A3B8; }
+        .log-info { color: #38bdf8; }
+        .log-warning { color: #facc15; }
+        .log-error { color: #f43f5e; }
+        .log-neutral { color: #94a3b8; }
     </style>
+
 </head>
 <body>
+    <!-- Ambient Orbs -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
 
-    <!-- M3 Navigation Rail -->
-    <div class="navigation-rail">
+    <div class="app-container">
+        <!-- M3 Navigation Rail -->
+        <div class="navigation-rail">
         <div class="rail-header">
-            <span class="material-symbols-outlined" style="font-size: 24px; color: var(--md-sys-color-primary);">folder</span>
+            <img src="/static/logo.svg" alt="Logo do Conversor" class="app-logo">
         </div>
         <div class="rail-items">
             <button class="rail-btn active" title="Como Usar" data-target="view-help">
@@ -539,8 +716,13 @@
                 <span>settings</span>
             </button>
         </div>
-        <div class="rail-footer" title="100% Offline">
-            <span>offline_bolt</span>
+        <div class="rail-footer" style="display:flex; flex-direction:column; gap:16px;">
+            <button class="rail-btn" id="theme-toggle" title="Alternar Tema">
+                <span id="theme-icon">light_mode</span>
+            </button>
+            <div title="100% Offline" style="display:flex; justify-content:center;">
+                <span style="font-family: 'Material Symbols Outlined'; font-size: 24px; color: #34d399; text-shadow: 0 0 16px rgba(52, 211, 153, 0.5);">offline_bolt</span>
+            </div>
         </div>
     </div>
 
@@ -555,7 +737,7 @@
                         <h1><span class="icon">help</span> Como Usar o Conversor</h1>
                         <p>Bem-vindo! Siga este guia rápido para utilizar todas as ferramentas avançadas.</p>
                     </header>
-                    <div style="color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6;">
+                    <div style="color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; flex: 1; overflow-y: auto; padding-right: 12px; min-height: 0;">
                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">1. Converter Formatos</h3>
                         <p>Selecione <strong>"Converter Formato"</strong>, arraste seus arquivos, escolha o formato de saída (como PDF, DOCX, CSV) e clique em Iniciar. Ideal para conversões universais individuais.</p>
                         
@@ -570,6 +752,18 @@
                         
                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">5. Segurança de PDFs</h3>
                         <p>Com as opções <strong>"Proteger PDF"</strong> e <strong>"Desbloquear PDF"</strong>, o campo de senha aparecerá. Você pode blindar um documento usando criptografia AES-256 localmente, ou remover travas existentes se possuir a senha original.</p>
+
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">6. Extrair Tabelas (PDF)</h3>
+                        <p>Selecione <strong>"Extrair Tabelas (PDF)"</strong> para ler dados tabulares de dentro do PDF e convertê-los automaticamente para uma planilha <code>.xlsx</code> ou <code>.csv</code> consolidada.</p>
+                        
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">7. Sanitizar Arquivo</h3>
+                        <p>Use <strong>"Sanitizar Arquivo"</strong> em PDFs ou Imagens para limpar todos os metadados (incluindo EXIF, autor, software usado), garantindo total privacidade antes do compartilhamento.</p>
+
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">8. Comprimir Arquivo</h3>
+                        <p>Use <strong>"Comprimir Arquivo"</strong> para reduzir o peso de PDFs (removendo lixo interno) ou para recomprimir vídeos pesados usando aceleração FFmpeg, gerando arquivos mais leves sem perder qualidade.</p>
+                        
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">9. Reconhecimento OCR</h3>
+                        <p>Selecione <strong>"Reconhecimento OCR"</strong> para escanear visualmente PDFs fatiados ou imagens, extraindo o texto e transformando-o num documento editável estruturado (como <code>.docx</code> ou <code>.txt</code>).</p>
                     </div>
                 </div>
             </section>
@@ -586,51 +780,63 @@
                     <!-- Input oculto para arquivos multiplos -->
                     <input type="file" id="file-input" multiple>
 
-                    <!-- Dropzone interativa M3 -->
-                    <div class="dropzone" id="dropzone">
-                        <span class="upload-icon">cloud_upload</span>
-                        <div class="primary-text">Arraste seus arquivos aqui ou clique para selecionar</div>
-                        <div class="secondary-text">Suporta múltiplos documentos, tabelas, imagens e mídias</div>
-                    </div>
+                    <div class="app-split-layout">
+                        <!-- Coluna 1: Workspace -->
+                        <div class="workspace-pane">
+                            <!-- Dropzone interativa M3 -->
+                            <div class="dropzone" id="dropzone">
+                                <span class="upload-icon">cloud_upload</span>
+                                <div class="primary-text">Arraste seus arquivos aqui ou clique para selecionar</div>
+                                <div class="secondary-text">Suporta múltiplos documentos, tabelas, imagens e mídias</div>
+                            </div>
 
-                    <!-- Fila de arquivos selecionados -->
-                    <div id="file-queue"></div>
+                            <!-- Fila de arquivos selecionados -->
+                            <div id="file-queue"></div>
+                        </div>
 
-                    <!-- Barra de configurações flexbox horizontal -->
-                    <div class="config-bar" style="flex-wrap: wrap;">
-                        <md-outlined-select label="Ação Desejada" id="select-action">
-                            <md-select-option selected value="Converter Formato"><div slot="headline">Converter Formato</div></md-select-option>
-                            <md-select-option value="Juntar PDFs"><div slot="headline">Juntar PDFs</div></md-select-option>
-                            <md-select-option value="Dividir PDF"><div slot="headline">Dividir PDF</div></md-select-option>
-                            <md-select-option value="Imagens para PDF"><div slot="headline">Imagens para PDF</div></md-select-option>
-                            <md-select-option value="PDF para Imagens"><div slot="headline">PDF para Imagens</div></md-select-option>
-                            <md-select-option value="Proteger PDF"><div slot="headline">Proteger PDF</div></md-select-option>
-                            <md-select-option value="Desbloquear PDF"><div slot="headline">Desbloquear PDF</div></md-select-option>
-                        </md-outlined-select>
+                        <!-- Coluna 2: Inspector -->
+                        <aside class="inspector-pane">
+                            <!-- Barra de configurações -->
+                            <div class="config-bar">
+                                <md-outlined-select label="Ação Desejada" id="select-action">
+                                    <md-select-option selected value="Converter Formato"><div slot="headline">Converter Formato</div></md-select-option>
+                                    <md-select-option value="Juntar PDFs"><div slot="headline">Juntar PDFs</div></md-select-option>
+                                    <md-select-option value="Dividir PDF"><div slot="headline">Dividir PDF</div></md-select-option>
+                                    <md-select-option value="Imagens para PDF"><div slot="headline">Imagens para PDF</div></md-select-option>
+                                    <md-select-option value="PDF para Imagens"><div slot="headline">PDF para Imagens</div></md-select-option>
+                                    <md-select-option value="Proteger PDF"><div slot="headline">Proteger PDF</div></md-select-option>
+                                    <md-select-option value="Desbloquear PDF"><div slot="headline">Desbloquear PDF</div></md-select-option>
+                                    <md-select-option value="Extrair Tabelas (PDF)"><div slot="headline">Extrair Tabelas (PDF)</div></md-select-option>
+                                    <md-select-option value="Sanitizar Arquivo"><div slot="headline">Sanitizar Arquivo</div></md-select-option>
+                                    <md-select-option value="Comprimir Arquivo"><div slot="headline">Comprimir Arquivo</div></md-select-option>
+                                    <md-select-option value="Reconhecimento OCR"><div slot="headline">Reconhecimento OCR</div></md-select-option>
+                                </md-outlined-select>
 
-                        <md-outlined-select label="Formato de Saída" id="format-select" disabled>
-                            <md-select-option selected value="">
-                                <div slot="headline">Insira arquivos na fila</div>
-                            </md-select-option>
-                        </md-outlined-select>
+                                <md-outlined-select label="Formato de Saída" id="format-select" disabled>
+                                    <md-select-option selected value="">
+                                        <div slot="headline">Insira arquivos na fila</div>
+                                    </md-select-option>
+                                </md-outlined-select>
 
-                        <md-outlined-text-field type="password" id="input-password" label="Senha do PDF" class="hidden"></md-outlined-text-field>
+                                <md-outlined-text-field type="password" id="input-password" label="Senha do PDF" class="hidden"></md-outlined-text-field>
 
-                        <md-outlined-text-field label="Delimitador" value=";" id="delimiter-field" disabled></md-outlined-text-field>
-                    </div>
+                                <md-outlined-text-field label="Delimitador" value=";" id="delimiter-field" disabled></md-outlined-text-field>
+                            </div>
 
-                    <!-- Progresso da Conversão -->
-                    <div class="progress-wrapper" id="progress-wrapper">
-                        <div class="progress-label" id="progress-label">Processando fila de arquivos offline...</div>
-                        <md-linear-progress indeterminate id="progress-bar"></md-linear-progress>
-                    </div>
+                            <!-- Progresso da Conversão -->
+                            <div class="progress-wrapper" id="progress-wrapper">
+                                <div class="progress-label" id="progress-label">Processando fila de arquivos offline...</div>
+                                <md-linear-progress indeterminate id="progress-bar"></md-linear-progress>
+                            </div>
 
-                    <!-- Botão de execução alinhado à direita -->
-                    <div class="actions">
-                        <md-filled-button id="convert-btn" disabled onclick="startBatchConversion()">
-                            <span slot="icon" class="material-symbols-outlined">play_arrow</span>
-                            Iniciar Conversão
-                        </md-filled-button>
+                            <!-- Botão de execução alinhado à direita -->
+                            <div class="actions">
+                                <md-filled-button id="convert-btn" disabled onclick="startBatchConversion()">
+                                    <span slot="icon" class="material-symbols-outlined">play_arrow</span>
+                                    Iniciar Conversão
+                                </md-filled-button>
+                            </div>
+                        </aside>
                     </div>
 
                     <!-- Alertas e resultados -->
@@ -706,6 +912,7 @@
         </div>
     </div>
 
+    </div>
     <script>
         // SPA Routing Vanilla JS Logic
         const railBtns = document.querySelectorAll('.rail-btn');
@@ -762,14 +969,9 @@
             } else {
                 inputPassword.classList.add('hidden');
             }
-
-            if (action !== "Converter Formato") {
-                formatSelect.setAttribute('disabled', 'true');
-                delimiterField.setAttribute('disabled', 'true');
-            } else {
-                if (selectedFiles.length > 0) formatSelect.removeAttribute('disabled');
-                if (formatSelect.value === '.csv') delimiterField.removeAttribute('disabled');
-            }
+            
+            // Força a interface a recalcular os formatos sempre que a ação mudar
+            updateControlsState();
         });
 
         dropzone.addEventListener('click', () => {
@@ -821,6 +1023,7 @@
                 const sizeKB = (file.size / 1024).toFixed(1) + ' KB';
                 const item = document.createElement('div');
                 item.className = 'queue-item';
+                item.dataset.index = idx;
                 
                 const ext = file.name.split('.').pop().toLowerCase();
                 let icon = 'description';
@@ -832,6 +1035,7 @@
 
                 item.innerHTML = `
                     <div class="queue-item-info">
+                        <span class="file-icon drag-handle" style="cursor: grab; margin-right: 8px;">drag_indicator</span>
                         <span class="file-icon">${icon}</span>
                         <div class="queue-item-meta">
                             <div class="queue-item-name">${file.name}</div>
@@ -843,6 +1047,26 @@
                     </button>
                 `;
                 fileQueue.appendChild(item);
+            });
+
+            if (window.queueSortable) {
+                window.queueSortable.destroy();
+            }
+            window.queueSortable = Sortable.create(fileQueue, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    const newFiles = [];
+                    const items = fileQueue.querySelectorAll('.queue-item');
+                    items.forEach(item => {
+                        const oldIdx = parseInt(item.dataset.index);
+                        newFiles.push(selectedFiles[oldIdx]);
+                    });
+                    selectedFiles = newFiles;
+                    renderQueue();
+                    updateControlsState();
+                }
             });
         }
 
@@ -856,13 +1080,7 @@
                 return;
             }
 
-            const hasCSV = selectedFiles.some(f => f.name.split('.').pop().toLowerCase() === 'csv');
-            if (hasCSV) {
-                delimiterField.removeAttribute('disabled');
-            } else {
-                delimiterField.setAttribute('disabled', 'true');
-            }
-
+            const action = selectAction.value;
             const refFile = selectedFiles[0];
             const formData = new FormData();
             formData.append('file', refFile);
@@ -876,8 +1094,19 @@
                 
                 if (result.status === 'success') {
                     formatSelect.innerHTML = '';
-                    if (result.allowed_targets && result.allowed_targets.length > 0) {
-                        result.allowed_targets.forEach((targetExt, index) => {
+                    
+                    let targetList = [];
+                    // Injeção mágica das extensões corretas baseada na ação escolhida
+                    if (action === "Reconhecimento OCR") {
+                        targetList = ['.docx', '.txt'];
+                    } else if (action === "Extrair Tabelas (PDF)") {
+                        targetList = ['.xlsx', '.csv'];
+                    } else {
+                        targetList = result.allowed_targets;
+                    }
+
+                    if (targetList && targetList.length > 0) {
+                        targetList.forEach((targetExt, index) => {
                             const option = document.createElement('md-select-option');
                             option.value = targetExt;
                             if (index === 0) option.setAttribute('selected', 'true');
@@ -889,7 +1118,19 @@
                             
                             formatSelect.appendChild(option);
                         });
-                        formatSelect.removeAttribute('disabled');
+                        
+                        if (action === "Converter Formato" || action === "Extrair Tabelas (PDF)" || action === "Reconhecimento OCR") {
+                            formatSelect.removeAttribute('disabled');
+                            if (action === "Converter Formato" && formatSelect.value === '.csv') {
+                                delimiterField.removeAttribute('disabled');
+                            } else {
+                                delimiterField.setAttribute('disabled', 'true');
+                            }
+                        } else {
+                            formatSelect.setAttribute('disabled', 'true');
+                            delimiterField.setAttribute('disabled', 'true');
+                        }
+                        
                         convertBtn.removeAttribute('disabled');
                         clearAlert();
                     } else {
@@ -1122,6 +1363,26 @@
                 }
             };
         }
-    </script>
+    
+        // Theme toggle logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        
+        // Initial check
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.classList.add('light-theme');
+            themeIcon.textContent = 'dark_mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light-theme');
+            if (document.documentElement.classList.contains('light-theme')) {
+                themeIcon.textContent = 'dark_mode';
+            } else {
+                themeIcon.textContent = 'light_mode';
+            }
+        });
+
+</script>
 </body>
 </html>
