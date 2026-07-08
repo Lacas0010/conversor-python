@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversor de Arquivos - Local</title>
-    <link rel="icon" type="image/x-icon" href="/static/app_icon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- M3 Fonts and Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
@@ -1384,11 +1384,27 @@
         });
 
         // ------------------ Heartbeat para fechamento automático ------------------
-        // Envia um ping para o servidor a cada 5 segundos. Se o navegador fechar, 
-        // o servidor percebe a ausência do ping e encerra o processo (no modo .exe).
-        setInterval(() => {
-            fetch('/api/heartbeat', { method: 'POST' }).catch(() => {});
-        }, 5000);
+        // Mantém uma conexão WebSocket aberta. Se a aba for fechada, o WebSocket
+        // desconecta imediatamente e o servidor encerra o processo. Se a aba apenas
+        // perder o foco, a conexão WebSocket permanece ativa.
+        function connectHeartbeat() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/heartbeat`;
+            const heartbeatWs = new WebSocket(wsUrl);
+            
+            // Mantém compatibilidade com o ping HTTP em navegadores antigos ou falhas do ws
+            const fallbackInterval = setInterval(() => {
+                if (heartbeatWs.readyState !== WebSocket.OPEN) {
+                    fetch('/api/heartbeat', { method: 'POST' }).catch(() => {});
+                }
+            }, 5000);
+
+            heartbeatWs.onclose = () => {
+                clearInterval(fallbackInterval);
+                setTimeout(connectHeartbeat, 2000);
+            };
+        }
+        connectHeartbeat();
 
 </script>
 </body>

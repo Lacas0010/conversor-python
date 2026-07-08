@@ -14,6 +14,7 @@ import uvicorn
 
 last_heartbeat = time.time()
 server_started = False
+heartbeat_clients = 0
 
 # Adiciona o diretório atual ao path para importar o motor
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -89,6 +90,13 @@ def serve_index():
     if not os.path.exists(index_path):
         raise HTTPException(status_code=404, detail="index.html não encontrado.")
     return FileResponse(index_path)
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    icon_path = os.path.join(base_dir, "app_icon.ico")
+    if os.path.exists(icon_path):
+        return FileResponse(icon_path)
+    raise HTTPException(status_code=404, detail="Ícone não encontrado")
 
 @app.post("/api/upload")
 async def upload_file(
@@ -168,6 +176,18 @@ def heartbeat():
     last_heartbeat = time.time()
     server_started = True
     return {"status": "ok"}
+
+@app.websocket("/ws/heartbeat")
+async def websocket_heartbeat(websocket: WebSocket):
+    global heartbeat_clients, server_started
+    await websocket.accept()
+    heartbeat_clients += 1
+    server_started = True
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        heartbeat_clients -= 1
 
 def remover_arquivos_temporarios(*caminhos: str):
     """
@@ -344,7 +364,7 @@ def start_browser():
     webbrowser.open("http://127.0.0.1:8080")
 
 def monitor_heartbeat():
-    global last_heartbeat, server_started
+    global last_heartbeat, server_started, heartbeat_clients
     start_time = time.time()
     while True:
         time.sleep(5)
@@ -354,8 +374,11 @@ def monitor_heartbeat():
                 if now - start_time > 60: # 60s sem abrir o navegador
                     os._exit(0)
             else:
-                if now - last_heartbeat > 30: # 30s sem heartbeat (navegador fechado ou ocupado)
-                    os._exit(0)
+                # 120s de limite para pings antigos E sem nenhum WebSocket conectado
+                if heartbeat_clients == 0 and (now - last_heartbeat > 120):
+                    time.sleep(5) # Grace period para recarregamento da página (F5)
+                    if heartbeat_clients == 0 and (time.time() - last_heartbeat > 120):
+                        os._exit(0)
 
 if __name__ == "__main__":
     # --- CORREÇÃO PARA O PYINSTALLER NOCONSOLE ---
