@@ -347,14 +347,14 @@ def monitor_heartbeat():
     global last_heartbeat, server_started
     start_time = time.time()
     while True:
-        time.sleep(2)
+        time.sleep(5)
         now = time.time()
         if getattr(sys, 'frozen', False):  # Apenas desliga sozinho se for .exe
             if not server_started:
-                if now - start_time > 30: # 30s sem abrir o navegador
+                if now - start_time > 60: # 60s sem abrir o navegador
                     os._exit(0)
             else:
-                if now - last_heartbeat > 5: # 5s sem heartbeat (navegador fechado)
+                if now - last_heartbeat > 30: # 30s sem heartbeat (navegador fechado ou ocupado)
                     os._exit(0)
 
 if __name__ == "__main__":

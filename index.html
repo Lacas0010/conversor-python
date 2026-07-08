@@ -1384,11 +1384,11 @@
         });
 
         // ------------------ Heartbeat para fechamento automático ------------------
-        // Envia um ping para o servidor a cada 2 segundos. Se o navegador fechar, 
+        // Envia um ping para o servidor a cada 5 segundos. Se o navegador fechar, 
         // o servidor percebe a ausência do ping e encerra o processo (no modo .exe).
         setInterval(() => {
             fetch('/api/heartbeat', { method: 'POST' }).catch(() => {});
-        }, 2000);
+        }, 5000);
 
 </script>
 </body>
