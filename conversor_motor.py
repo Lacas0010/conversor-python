@@ -211,7 +211,9 @@ def converter_dados(origem: str, destino: str, delimitador: str = ";") -> None:
     try:
         # Leitura dos dados
         if ext_origem == ".csv":
-            df = pd.read_csv(origem, sep=delimitador)
+            # O parâmetro on_bad_lines='skip' ignora linhas problemáticas
+            # O parâmetro engine='python' é mais flexível que o padrão C
+            df = pd.read_csv(origem, sep=delimitador, on_bad_lines='skip', engine='python')
         elif ext_origem == ".tsv":
             df = pd.read_csv(origem, sep="\t")
         elif ext_origem == ".xlsx":

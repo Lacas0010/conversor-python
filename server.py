@@ -9,6 +9,7 @@ from typing import List
 from contextlib import contextmanager
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 # Adiciona o diretório atual ao path para importar o motor
@@ -26,6 +27,12 @@ os.environ["FFMPEG_PATH"] = ffmpeg_path
 # ----------------------------------------------
 
 app = FastAPI(title="Conversor de Arquivos - Web Interface")
+
+# Determina o diretório base para suportar PyInstaller (.exe) ou script
+base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+
+# Monta a pasta atual como servidora de arquivos estáticos
+app.mount("/static", StaticFiles(directory=base_dir), name="static")
 
 active_websockets = []
 
@@ -73,12 +80,6 @@ def serve_index():
     """
     Serve a página principal index.html, suportando modo PyInstaller (.exe) ou script.
     """
-    # Verifica se está rodando como um executável compilado
-    if getattr(sys, 'frozen', False):
-        base_dir = sys._MEIPASS # Pasta temporária do PyInstaller
-    else:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        
     index_path = os.path.join(base_dir, "index.html")
     
     if not os.path.exists(index_path):
