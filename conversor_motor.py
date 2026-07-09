@@ -7,32 +7,37 @@ import sqlite3
 import json
 from typing import List, Dict
 
-def encontrar_libreoffice() -> str:
-    """
-    Procura o executável do LibreOffice (soffice) em caminhos comuns e portáteis.
-    Retorna o caminho completo se encontrado, ou None.
-    """
-    # 1. Procurar no PATH do sistema
-    soffice_exec = shutil.which("soffice") or shutil.which("libreoffice")
-    if soffice_exec:
-        return soffice_exec
+def encontrar_libreoffice():
+    import os
+    import sys
+    import shutil
 
-    # 2. Procurar na pasta local (portátil)
-    # Se estiver rodando via PyInstaller (congelado), sys._MEIPASS é o diretório temporário.
-    # Caso contrário, usamos o diretório do script atual.
-    base_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    # 1. Tenta achar no PATH do sistema operacional
+    soffice = shutil.which("soffice")
+    if soffice:
+        return soffice
+
+    # 2. Descobre a pasta real onde o programa está sendo executado
+    if getattr(sys, 'frozen', False):
+        # Se for o .exe compilado, pega a pasta onde o .exe está (a sua pasta 'dist')
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        # Se for o script rodando via terminal no VS Code, pega a pasta raiz do projeto
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # 3. Procura o LibreOffice Portátil lado a lado com o programa
     caminho_portatil = os.path.join(base_dir, "LibreOfficePortable", "App", "libreoffice", "program", "soffice.exe")
     if os.path.exists(caminho_portatil):
         return caminho_portatil
 
-    # 3. Procurar em caminhos padrão de instalação no Windows
+    # 4. Fallback de segurança: Procura nas pastas de instalação padrão do Windows
     caminhos_padrao = [
         r"C:\Program Files\LibreOffice\program\soffice.exe",
         r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
     ]
-    for caminho in caminhos_padrao:
-        if os.path.exists(caminho):
-            return caminho
+    for cp in caminhos_padrao:
+        if os.path.exists(cp):
+            return cp
 
     return None
 
