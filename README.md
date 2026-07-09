@@ -19,7 +19,8 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 8. **Sanitização de Arquivos**: Limpe todo e qualquer metadado ou rastro de PDFs e Imagens, garantindo privacidade militar antes do envio.
 9. **Compressão Otimizada**: Reduza massivamente o peso de PDFs e vídeos através do motor otimizado de deflate interno.
 10. **Reconhecimento OCR Avançado**: Leia o texto contido em PDFs escaneados ou imagens e transforme num documento `.docx` usando Tesseract.
-11. **Conversão em Lote (ZIP)**: Converta vários arquivos simultaneamente em paralelo e baixe todos empacotados num único pacote `.zip`.
+11. **Edição Avançada de PDFs**: Rotacione páginas do documento, exclua páginas específicas (suportando intervalos como `1, 3-5`), insira numeração automática de páginas ou aplique marcas d'água de texto.
+12. **Conversão em Lote (ZIP)**: Converta vários arquivos simultaneamente em paralelo e baixe todos empacotados num único pacote `.zip`.
 
 ---
 
@@ -44,7 +45,7 @@ Para a conversão de apresentações (PPT/PPTX), arquivos OpenDocument (ODT) ou 
    ```
    *Ou instale-as diretamente via terminal:*
    ```bash
-   pip install fastapi uvicorn python-multipart PyMuPDF pandas openpyxl pdfplumber piexif pytesseract Pillow python-docx docx2pdf xlrd pyarrow geopandas fiona
+   pip install fastapi uvicorn python-multipart PyMuPDF pandas openpyxl pdfplumber pytesseract Pillow python-docx docx2pdf xlrd pyarrow geopandas fiona
    ```
 2. Inicie o servidor FastAPI:
    ```bash

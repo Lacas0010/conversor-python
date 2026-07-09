@@ -966,6 +966,82 @@ def ocr_documento(origem: str, destino: str) -> None:
             raise e
         raise ConversionError(f"Falha ao realizar OCR: {str(e)}")
 
+def rotacionar_pdf(origem: str, destino: str, angulo: int) -> None:
+    try:
+        import fitz
+        doc = fitz.open(origem)
+        for page in doc:
+            page.set_rotation(int(angulo))
+        doc.save(destino)
+        doc.close()
+    except Exception as e:
+        raise ConversionError(f"Erro ao rotacionar PDF: {str(e)}")
+
+def numerar_paginas_pdf(origem: str, destino: str) -> None:
+    try:
+        import fitz
+        doc = fitz.open(origem)
+        for i, page in enumerate(doc):
+            texto = f"Página {i+1} de {len(doc)}"
+            ponto = fitz.Point(page.rect.width - 120, page.rect.height - 30)
+            page.insert_text(ponto, texto, fontsize=10, color=(0, 0, 0))
+        doc.save(destino)
+        doc.close()
+    except Exception as e:
+        raise ConversionError(f"Erro ao numerar páginas do PDF: {str(e)}")
+
+def remover_paginas_pdf(origem: str, destino: str, paginas_str: str) -> None:
+    try:
+        import fitz
+        doc = fitz.open(origem)
+        paginas_a_remover = set()
+        
+        partes = [p.strip() for p in paginas_str.split(",") if p.strip()]
+        for parte in partes:
+            if "-" in parte:
+                subpartes = parte.split("-")
+                if len(subpartes) == 2:
+                    inicio = int(subpartes[0].strip())
+                    fim = int(subpartes[1].strip())
+                    for p_num in range(inicio, fim + 1):
+                        paginas_a_remover.add(p_num - 1)
+            else:
+                paginas_a_remover.add(int(parte) - 1)
+        
+        total_paginas = len(doc)
+        indices_validos = sorted(
+            [p for p in paginas_a_remover if 0 <= p < total_paginas],
+            reverse=True
+        )
+        
+        if len(indices_validos) == total_paginas:
+            doc.close()
+            raise ConversionError("Não é permitido remover todas as páginas do PDF.")
+            
+        for p in indices_validos:
+            doc.delete_page(p)
+            
+        doc.save(destino)
+        doc.close()
+    except Exception as e:
+        if isinstance(e, ConversionError):
+            raise e
+        raise ConversionError(f"Erro ao remover páginas do PDF: {str(e)}")
+
+def aplicar_marca_dagua(origem: str, destino: str, texto: str) -> None:
+    if not origem.lower().endswith(".pdf"):
+        raise ConversionError("A marca d'água só pode ser aplicada em arquivos PDF.")
+    try:
+        import fitz
+        doc = fitz.open(origem)
+        for page in doc:
+            ponto = fitz.Point(50, page.rect.height / 2)
+            page.insert_text(ponto, texto, fontsize=60, color=(0.6, 0.6, 0.6), fill_opacity=0.3, morph=(ponto, fitz.Matrix(45)))
+        doc.save(destino)
+        doc.close()
+    except Exception as e:
+        raise ConversionError(f"Erro ao aplicar marca d'água: {str(e)}")
+
 # 9. Interface de Linha de Comando (CLI) para Testes
 if __name__ == "__main__":
     import argparse

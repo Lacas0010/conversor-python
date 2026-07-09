@@ -22,7 +22,8 @@ from conversor_motor import (
     converter_arquivo, obter_saidas_permitidas, ConversionError,
     juntar_pdfs, dividir_pdf, proteger_pdf, desbloquear_pdf,
     pdf_para_imagens, imagens_para_pdf,
-    extrair_tabelas_pdf, sanitizar_arquivo, comprimir_arquivo, ocr_documento
+    extrair_tabelas_pdf, sanitizar_arquivo, comprimir_arquivo, ocr_documento,
+    rotacionar_pdf, numerar_paginas_pdf, remover_paginas_pdf, aplicar_marca_dagua
 )
 
 # --- CONFIGURAÇÃO FFMPEG PARA O PYINSTALLER ---
@@ -211,7 +212,10 @@ async def convert_file_stream(
     acao: str = Form("Converter Formato"),
     formato_saida: str = Form(None),
     senha: str = Form(None),
-    csv_delimiter: str = Form(";")
+    csv_delimiter: str = Form(";"),
+    marca_dagua: str = Form("CONFIDENCIAL"),
+    angulo: int = Form(90),
+    paginas_remover: str = Form("")
 ):
     temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_uploads")
     os.makedirs(temp_dir, exist_ok=True)
@@ -350,6 +354,42 @@ async def convert_file_stream(
             output_filename = "lote_convertido.zip"
             
             background_tasks.add_task(remover_arquivos_temporarios, *input_paths, lote_dir, output_path)
+
+        elif acao == "Adicionar Marca d'Água":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_marcado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, aplicar_marca_dagua, input_path, output_path, marca_dagua)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Rotacionar PDF":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_rotacionado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, rotacionar_pdf, input_path, output_path, angulo)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Numerar Páginas":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_numerado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, numerar_paginas_pdf, input_path, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Remover Páginas":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_fatiado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, remover_paginas_pdf, input_path, output_path, paginas_remover)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
 
         else:
             input_path = input_paths[0]
