@@ -1,10 +1,40 @@
 import os
+import sys
 import shutil
 import subprocess
 import zipfile
 import sqlite3
 import json
 from typing import List, Dict
+
+def encontrar_libreoffice() -> str:
+    """
+    Procura o executável do LibreOffice (soffice) em caminhos comuns e portáteis.
+    Retorna o caminho completo se encontrado, ou None.
+    """
+    # 1. Procurar no PATH do sistema
+    soffice_exec = shutil.which("soffice") or shutil.which("libreoffice")
+    if soffice_exec:
+        return soffice_exec
+
+    # 2. Procurar na pasta local (portátil)
+    # Se estiver rodando via PyInstaller (congelado), sys._MEIPASS é o diretório temporário.
+    # Caso contrário, usamos o diretório do script atual.
+    base_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    caminho_portatil = os.path.join(base_dir, "LibreOfficePortable", "App", "libreoffice", "program", "soffice.exe")
+    if os.path.exists(caminho_portatil):
+        return caminho_portatil
+
+    # 3. Procurar em caminhos padrão de instalação no Windows
+    caminhos_padrao = [
+        r"C:\Program Files\LibreOffice\program\soffice.exe",
+        r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
+    ]
+    for caminho in caminhos_padrao:
+        if os.path.exists(caminho):
+            return caminho
+
+    return None
 
 class ConversionError(Exception):
     """
@@ -19,7 +49,7 @@ MAPA_FORMATOS = {
     ".jpeg": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico"],
     ".jpg": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico"],
     ".webp": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico"],
-    ".gif": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico"],
+    ".gif": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico", ".mp4", ".gif"],
     ".bmp": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico"],
     ".tiff": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico"],
     ".ico": [".png", ".jpg", ".webp", ".pdf", ".bmp", ".ico"],
@@ -34,19 +64,19 @@ MAPA_FORMATOS = {
     ".nef": [".png", ".jpg", ".pdf"],
 
     # VÍDEOS (Gerenciado localmente via executável FFmpeg)
-    ".mp4": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".mkv": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".webm": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".avi": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".mov": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".wmv": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".ts": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".mts": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".m2ts": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".mpg": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".mpeg": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".flv": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
-    ".3gp": [".mp4", ".mkv", ".webm", ".avi", ".mp3", ".wav", ".flac"],
+    ".mp4": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".mkv": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".webm": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".avi": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".mov": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".wmv": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".ts": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".mts": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".m2ts": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".mpg": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".mpeg": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".flv": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
+    ".3gp": [".mp4", ".mkv", ".webm", ".avi", ".gif", ".mp3", ".wav", ".flac"],
 
     # ÁUDIOS (Gerenciado localmente via executável FFmpeg)
     ".mp3": [".mp3", ".wav", ".flac", ".ogg", ".opus", ".m4a"],
@@ -58,11 +88,13 @@ MAPA_FORMATOS = {
     ".m4a": [".mp3", ".wav", ".flac", ".ogg", ".opus", ".m4a"],
     ".wma": [".mp3", ".wav", ".flac", ".ogg", ".opus", ".m4a"],
 
-    # DADOS ESTRUTURADOS (Pandas/openpyxl)
-    ".csv": [".xlsx", ".json"],
-    ".tsv": [".xlsx", ".json"],
-    ".xlsx": [".csv", ".json"],
-    ".json": [".csv", ".xlsx", ".xml", ".yaml"],
+    # DADOS ESTRUTURADOS (Pandas/openpyxl/pyarrow)
+    ".csv": [".xlsx", ".xls", ".json", ".parquet"],
+    ".tsv": [".xlsx", ".xls", ".json", ".parquet"],
+    ".xlsx": [".csv", ".xls", ".json", ".parquet"],
+    ".xls": [".xlsx", ".csv", ".json", ".parquet"],
+    ".parquet": [".xlsx", ".csv", ".json"],
+    ".json": [".csv", ".xlsx", ".xls", ".xml", ".yaml", ".parquet"],
 
     # DOCUMENTOS GERAIS
     ".docx": [".pdf", ".txt"],
@@ -73,10 +105,12 @@ MAPA_FORMATOS = {
     ".odt": [".pdf", ".txt", ".docx"],
     ".epub": [".pdf", ".txt"],
     ".pdf": [".docx"],
+    ".ppt": [".pdf", ".txt", ".pptx"],
+    ".pptx": [".pdf", ".txt"],
 
     # ARQUIVOS OPENDOCUMENT (LibreOffice / Pandas engine odf)
-    ".ods": [".xlsx", ".csv"],
-    ".odp": [".pdf", ".txt"],
+    ".ods": [".xlsx", ".xls", ".csv"],
+    ".odp": [".pdf", ".txt", ".pptx"],
 
     # BANCOS DE DADOS E INFRAESTRUTURA
     ".sqlite": [".xlsx", ".csv", ".json"],
@@ -95,6 +129,7 @@ MAPA_FORMATOS = {
     ".kml": [".geojson", ".csv"],
     ".geojson": [".kml", ".csv"]
 }
+
 
 # Helper para converter XML parseado por ElementTree para dicionário de forma recursiva
 def xml_para_dict_recursivo(element) -> Dict:
@@ -221,8 +256,10 @@ def converter_dados(origem: str, destino: str, delimitador: str = ";") -> None:
             df = pd.read_csv(origem, sep=delimitador, on_bad_lines='skip', engine='python')
         elif ext_origem == ".tsv":
             df = pd.read_csv(origem, sep="\t")
-        elif ext_origem == ".xlsx":
+        elif ext_origem in (".xlsx", ".xls"):
             df = pd.read_excel(origem)
+        elif ext_origem == ".parquet":
+            df = pd.read_parquet(origem)
         elif ext_origem == ".ods":
             # Requer o pacote 'odfpy' instalado
             try:
@@ -254,8 +291,10 @@ def converter_dados(origem: str, destino: str, delimitador: str = ";") -> None:
         # Escrita no formato de destino
         if ext_destino == ".csv":
             df.to_csv(destino, index=False, sep=delimitador)
-        elif ext_destino == ".xlsx":
+        elif ext_destino in (".xlsx", ".xls"):
             df.to_excel(destino, index=False)
+        elif ext_destino == ".parquet":
+            df.to_parquet(destino, index=False)
         elif ext_destino == ".json":
             df.to_json(destino, orient="records", indent=4, force_ascii=False)
         elif ext_destino == ".xml":
@@ -434,18 +473,24 @@ def compactar_arquivos(lista_origem: List[str], destino_zip: str) -> None:
 
 # Conversão para PDF/A (Usa LibreOffice Headless 'soffice' no sistema)
 def converter_para_pdf_a(origem: str, destino: str) -> None:
-    soffice_exec = shutil.which("soffice") or shutil.which("libreoffice")
+    soffice_exec = encontrar_libreoffice()
     if not soffice_exec:
         raise ConversionError(
-            "A exportação/conversão offline para PDF/A requer o LibreOffice instalado localmente.\n"
-            "Por favor, instale o LibreOffice e adicione o utilitário 'soffice' ao PATH do sistema."
+            "O LibreOffice não foi encontrado no sistema.\n"
+            "Por favor, instale o LibreOffice ou coloque a versão portátil na pasta do aplicativo."
         )
 
     try:
         outdir = os.path.dirname(destino) or "."
         # soffice --headless --convert-to pdf:writer_pdf_Export --outdir <pasta> <arquivo>
         cmd = [soffice_exec, "--headless", "--convert-to", "pdf:writer_pdf_Export", "--outdir", outdir, origem]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        
+        # Prepara argumentos para ocultar a janela do console no Windows
+        run_kwargs = {'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE, 'text': True, 'check': True}
+        if os.name == 'nt':
+            run_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
+        result = subprocess.run(cmd, **run_kwargs)
         
         # O LibreOffice salva o pdf com o nome base do original na pasta informada
         nome_original_base = os.path.splitext(os.path.basename(origem))[0]
@@ -555,21 +600,27 @@ def converter_documento(origem: str, destino: str) -> None:
             raise ConversionError(f"Falha ao extrair texto do DOCX: {str(e)}")
     elif ext_origem == ".odt" and ext_destino == ".docx":
         # Converte ODT para DOCX usando LibreOffice headless
-        soffice_exec = shutil.which("soffice") or shutil.which("libreoffice")
-        if soffice_exec:
-            try:
-                outdir = os.path.dirname(destino) or "."
-                cmd = [soffice_exec, "--headless", "--convert-to", "docx", "--outdir", outdir, origem]
-                subprocess.run(cmd, check=True)
-                gerado = os.path.join(outdir, os.path.splitext(os.path.basename(origem))[0] + ".docx")
-                if os.path.exists(gerado) and os.path.abspath(gerado) != os.path.abspath(destino):
-                    if os.path.exists(destino):
-                        os.remove(destino)
-                    os.rename(gerado, destino)
-                return
-            except Exception as e:
-                raise ConversionError(f"Erro ao converter ODT para DOCX via LibreOffice: {str(e)}")
-        raise ConversionError("LibreOffice soffice não encontrado para conversão ODT -> DOCX.")
+        soffice_exec = encontrar_libreoffice()
+        if not soffice_exec:
+            raise ConversionError("O LibreOffice não foi encontrado no sistema para a conversão ODT -> DOCX.")
+        try:
+            outdir = os.path.dirname(destino) or "."
+            cmd = [soffice_exec, "--headless", "--convert-to", "docx", "--outdir", outdir, origem]
+            
+            # Prepara argumentos para ocultar a janela do console no Windows
+            run_kwargs = {'check': True}
+            if os.name == 'nt':
+                run_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+                
+            subprocess.run(cmd, **run_kwargs)
+            gerado = os.path.join(outdir, os.path.splitext(os.path.basename(origem))[0] + ".docx")
+            if os.path.exists(gerado) and os.path.abspath(gerado) != os.path.abspath(destino):
+                if os.path.exists(destino):
+                    os.remove(destino)
+                os.rename(gerado, destino)
+            return
+        except Exception as e:
+            raise ConversionError(f"Erro ao converter ODT para DOCX via LibreOffice: {str(e)}")
     else:
         raise ConversionError(
             f"A conversão de '{ext_origem}' para '{ext_destino}' ainda não possui suporte offline.\n"
@@ -600,13 +651,17 @@ def converter_arquivo(origem: str, destino: str, delimitador: str = ";") -> None
     imagens_raw = {".psd", ".heic", ".heif", ".dng", ".cr2", ".nef"}
     videos = {".mp4", ".mkv", ".webm", ".avi", ".mov", ".wmv", ".ts", ".mts", ".m2ts", ".mpg", ".mpeg", ".flv", ".3gp"}
     audios = {".mp3", ".wav", ".flac", ".ogg", ".opus", ".aac", ".m4a", ".wma"}
-    dados = {".csv", ".tsv", ".xlsx", ".json", ".xml", ".yaml", ".yml", ".ods"}
+    dados = {".csv", ".tsv", ".xlsx", ".xls", ".parquet", ".json", ".xml", ".yaml", ".yml", ".ods"}
     databases = {".sqlite", ".db", ".sql"}
-    documentos = {".docx", ".doc", ".md", ".html", ".rtf", ".odt", ".epub", ".odp", ".pdf"}
+    documentos = {".docx", ".doc", ".md", ".html", ".rtf", ".odt", ".epub", ".odp", ".pdf", ".ppt", ".pptx"}
     geoespaciais = {".kml", ".geojson"}
 
     if ext_origem in imagens_comuns or ext_origem in imagens_raw:
-        converter_imagem(origem, destino)
+        # Se a origem for GIF e o destino for um formato de vídeo (ex: mp4), usamos o FFmpeg
+        if ext_origem == ".gif" and ext_destino in videos:
+            converter_midia_ffmpeg(origem, destino)
+        else:
+            converter_imagem(origem, destino)
     elif ext_origem in videos or ext_origem in audios:
         converter_midia_ffmpeg(origem, destino)
     elif ext_origem in dados:

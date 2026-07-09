@@ -739,7 +739,7 @@
                     </header>
                     <div style="color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; flex: 1; overflow-y: auto; padding-right: 12px; min-height: 0;">
                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">1. Converter Formatos</h3>
-                        <p>Selecione <strong>"Converter Formato"</strong>, arraste seus arquivos, escolha o formato de saída (como PDF, DOCX, CSV) e clique em Iniciar. Ideal para conversões universais individuais.</p>
+                        <p>Selecione <strong>"Converter Formato"</strong>, arraste seus arquivos, escolha o formato de saída (suportando PDF, DOCX, TXT, planilhas CSV, XLSX, XLS, dados Parquet, apresentações PPT/PPTX e exportação de GIFs animados a partir de vídeos) e clique em Iniciar. Ideal para conversões universais individuais.</p>
                         
                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">2. Juntar PDFs</h3>
                         <p>Selecione <strong>"Juntar PDFs"</strong> e arraste <strong>múltiplos PDFs</strong>. O sistema unirá todos em um único documento, mantendo a ordem da fila de arquivos.</p>
@@ -762,8 +762,11 @@
                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">8. Comprimir Arquivo</h3>
                         <p>Use <strong>"Comprimir Arquivo"</strong> para reduzir o peso de PDFs (removendo lixo interno) ou para recomprimir vídeos pesados usando aceleração FFmpeg, gerando arquivos mais leves sem perder qualidade.</p>
                         
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">9. Reconhecimento OCR</h3>
+                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">9. Reconhecimento OCR</h3>
                         <p>Selecione <strong>"Reconhecimento OCR"</strong> para escanear visualmente PDFs fatiados ou imagens, extraindo o texto e transformando-o num documento editável estruturado (como <code>.docx</code> ou <code>.txt</code>).</p>
+
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">10. Converter em Lote (ZIP)</h3>
+                        <p>Selecione <strong>"Converter Lote (ZIP)"</strong> para enviar múltiplos arquivos de uma vez. O motor converterá todos de forma paralela e os agrupará em um arquivo compactado <code>.zip</code> para download rápido.</p>
                     </div>
                 </div>
             </section>
@@ -800,6 +803,7 @@
                             <div class="config-bar">
                                 <md-outlined-select label="Ação Desejada" id="select-action">
                                     <md-select-option selected value="Converter Formato"><div slot="headline">Converter Formato</div></md-select-option>
+                                    <md-select-option value="Converter em Lote (ZIP)"><div slot="headline">Converter Lote (ZIP)</div></md-select-option>
                                     <md-select-option value="Juntar PDFs"><div slot="headline">Juntar PDFs</div></md-select-option>
                                     <md-select-option value="Dividir PDF"><div slot="headline">Dividir PDF</div></md-select-option>
                                     <md-select-option value="Imagens para PDF"><div slot="headline">Imagens para PDF</div></md-select-option>
@@ -1105,9 +1109,9 @@
                             formatSelect.appendChild(option);
                         });
                         
-                        if (action === "Converter Formato" || action === "Extrair Tabelas (PDF)" || action === "Reconhecimento OCR") {
+                        if (action === "Converter Formato" || action === "Extrair Tabelas (PDF)" || action === "Reconhecimento OCR" || action === "Converter em Lote (ZIP)") {
                             formatSelect.removeAttribute('disabled');
-                            if (action === "Converter Formato" && formatSelect.value === '.csv') {
+                            if ((action === "Converter Formato" || action === "Converter em Lote (ZIP)") && formatSelect.value === '.csv') {
                                 delimiterField.removeAttribute('disabled');
                             } else {
                                 delimiterField.setAttribute('disabled', 'true');
@@ -1177,10 +1181,19 @@
             let successCount = 0;
             let errorsCount = 0;
 
-            if (action === "Juntar PDFs" || action === "Imagens para PDF") {
-                document.getElementById('progress-label').textContent = `Juntando ${selectedFiles.length} arquivos...`;
+            if (action === "Juntar PDFs" || action === "Imagens para PDF" || action === "Converter em Lote (ZIP)") {
+                let progressText = `Juntando ${selectedFiles.length} arquivos...`;
+                if (action === "Converter em Lote (ZIP)") {
+                    progressText = `Convertendo e compactando ${selectedFiles.length} arquivos em lote...`;
+                }
+                document.getElementById('progress-label').textContent = progressText;
+
                 const formData = new FormData();
                 formData.append('acao', action);
+                if (selectedFormat) formData.append('formato_saida', selectedFormat);
+                if (delimiter) formData.append('csv_delimiter', delimiter);
+                if (password) formData.append('senha', password);
+
                 for (let file of selectedFiles) {
                     formData.append('files', file);
                 }
@@ -1192,7 +1205,15 @@
                         const a = document.createElement('a');
                         a.style.display = 'none';
                         a.href = url;
-                        a.download = action === "Imagens para PDF" ? "imagens_juntas.pdf" : "pdfs_juntos.pdf";
+                        
+                        let downloadName = "pdfs_juntos.pdf";
+                        if (action === "Imagens para PDF") {
+                            downloadName = "imagens_juntas.pdf";
+                        } else if (action === "Converter em Lote (ZIP)") {
+                            downloadName = "lote_convertido.zip";
+                        }
+                        
+                        a.download = downloadName;
                         document.body.appendChild(a);
                         a.click();
                         window.URL.revokeObjectURL(url);
@@ -1200,7 +1221,8 @@
                         successCount++;
                     } else {
                         const errResult = await response.json().catch(() => ({}));
-                        showAlert(`Erro ao juntar PDFs: ${errResult.message || response.statusText}`, 'error');
+                        let errLabel = action === "Converter em Lote (ZIP)" ? "Erro ao processar lote" : "Erro ao juntar PDFs";
+                        showAlert(`${errLabel}: ${errResult.message || response.statusText}`, 'error');
                         errorsCount++;
                     }
                 } catch (err) {

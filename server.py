@@ -191,13 +191,16 @@ async def websocket_heartbeat(websocket: WebSocket):
 
 def remover_arquivos_temporarios(*caminhos: str):
     """
-    Remove arquivos temporários locais para evitar o acúmulo de arquivos em disco.
+    Remove arquivos e pastas temporários locais para evitar o acúmulo de arquivos em disco.
     """
     time.sleep(1.0)
     for caminho in caminhos:
         try:
             if os.path.exists(caminho):
-                os.remove(caminho)
+                if os.path.isdir(caminho):
+                    shutil.rmtree(caminho, ignore_errors=True)
+                else:
+                    os.remove(caminho)
         except Exception:
             pass
 
@@ -330,6 +333,24 @@ async def convert_file_stream(
                 await loop.run_in_executor(None, ocr_documento, input_path, output_path)
             background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
             
+        elif acao == "Converter em Lote (ZIP)":
+            lote_id = f"lote_{int(time.time() * 1000)}"
+            lote_dir = os.path.join(temp_dir, lote_id)
+            os.makedirs(lote_dir, exist_ok=True)
+            
+            for ipath in input_paths:
+                nome_base = os.path.splitext(os.path.basename(ipath))[0]
+                caminho_saida = os.path.join(lote_dir, f"{nome_base}{formato_saida}")
+                with redirect_to_ws(loop):
+                    await loop.run_in_executor(None, converter_arquivo, ipath, caminho_saida, csv_delimiter)
+            
+            zip_base = os.path.join(temp_dir, f"{lote_id}_final")
+            shutil.make_archive(zip_base, 'zip', lote_dir)
+            output_path = f"{zip_base}.zip"
+            output_filename = "lote_convertido.zip"
+            
+            background_tasks.add_task(remover_arquivos_temporarios, *input_paths, lote_dir, output_path)
+
         else:
             input_path = input_paths[0]
             name, ext = os.path.splitext(os.path.basename(input_path))

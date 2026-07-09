@@ -20,7 +20,13 @@ temp_uploads/
 # Binários de Terceiros
 ffmpeg_bin/
 Tesseract-OCR/
+LibreOfficePortable/
 
 # Sistema Operacional
 .DS_Store
 Thumbs.db
+
+# Configurações de IDEs/Editores
+.vscode/
+.idea/
+

@@ -9,7 +9,7 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 
 ## 🛠️ Ferramentas Disponíveis
 
-1. **Conversão de Formatos**: Transforme CSVs para Excel, JSONs para planilhas, Word para PDF, e vice-versa.
+1. **Conversão de Formatos**: Transforme CSVs para Excel, JSONs para planilhas, dados Parquet, apresentações PPT/PPTX, Word para PDF, e exporte GIFs animados a partir de vídeos.
 2. **Juntar PDFs**: Combine infinitos documentos PDF em um único arquivo de forma otimizada.
 3. **Dividir PDF**: Fatie um documento PDF em páginas únicas individuais, exportadas automaticamente via arquivo `.zip`.
 4. **Imagens para PDF**: Empacote uma série de fotos (JPG, PNG) em um arquivo PDF multipágina em questão de segundos.
@@ -19,6 +19,7 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 8. **Sanitização de Arquivos**: Limpe todo e qualquer metadado ou rastro de PDFs e Imagens, garantindo privacidade militar antes do envio.
 9. **Compressão Otimizada**: Reduza massivamente o peso de PDFs e vídeos através do motor otimizado de deflate interno.
 10. **Reconhecimento OCR Avançado**: Leia o texto contido em PDFs escaneados ou imagens e transforme num documento `.docx` usando Tesseract.
+11. **Conversão em Lote (ZIP)**: Converta vários arquivos simultaneamente em paralelo e baixe todos empacotados num único pacote `.zip`.
 
 ---
 
@@ -27,7 +28,13 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 Você tem duas formas de rodar a aplicação:
 
 **⚠️ Pré-requisito de Mídia (FFmpeg)**
-Para realizar conversões de áudio e vídeo (como extração de MP3), o motor necessita do executável do FFmpeg. Crie uma pasta chamada `ffmpeg_bin` na raiz do projeto (no mesmo nível do `server.py`) e coloque o `ffmpeg.exe` dentro dela. Caso contrário, o motor tentará buscar uma instalação global no PATH do Windows.
+Para realizar conversões de áudio e vídeo (como extração de MP3 ou geração de GIFs), o motor necessita do executável do FFmpeg. Crie uma pasta chamada `ffmpeg_bin` na raiz do projeto (no mesmo nível do `server.py`) e coloque o `ffmpeg.exe` dentro dela. Caso contrário, o motor tentará buscar uma instalação global no PATH do Windows.
+
+**⚠️ Pré-requisito de Documentos (LibreOffice)**
+Para a conversão de apresentações (PPT/PPTX), arquivos OpenDocument (ODT) ou para exportar PDFs a partir de documentos de texto, o motor busca por uma instalação do LibreOffice. Ele tentará localizar o `soffice` nos seguintes caminhos de forma automática:
+1. No PATH do sistema (instalação padrão do sistema).
+2. Na pasta local `LibreOfficePortable/` na raiz do projeto (ótimo para uso portátil offline).
+3. Nos caminhos padrão do Windows (`C:\Program Files\LibreOffice` ou `C:\Program Files (x86)\LibreOffice`).
 
 ### Opção 1: Via Python Script (Desenvolvimento)
 
@@ -75,6 +82,7 @@ conversor python/
 ├── requirements.txt      # Lista de dependências Python
 ├── ffmpeg_bin/           # (Opcional) Pasta contendo o ffmpeg.exe para compressão de mídias
 ├── Tesseract-OCR/        # (Opcional) Pasta contendo o Tesseract para reconhecimento OCR
+├── LibreOfficePortable/  # (Opcional) Pasta contendo a suite portátil LibreOffice
 ├── temp_uploads/         # Diretório criado automaticamente para processamento local
 └── dist/                 # Diretório criado ao compilar o .exe final
 ```
