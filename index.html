@@ -1287,6 +1287,10 @@
                 if (soundSwitch && soundSwitch.selected) {
                     playCompletionSound();
                 }
+                // Limpa a fila automaticamente
+                selectedFiles = [];
+                renderQueue();
+                updateControlsState();
             } else if (successCount > 0) {
                 showAlert(`<strong>Conversão concluída com avisos</strong><br>Sucesso: ${successCount} | Falhas: ${errorsCount}. Verifique os alertas exibidos.`, 'error');
             }
