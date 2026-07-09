@@ -23,6 +23,10 @@ dist/
 # Temporários da Aplicação
 temp_uploads/
 *.zip
+*.pfx
+*.p12
+*.pem
+*.key
 
 # Binários de Terceiros
 ffmpeg_bin/

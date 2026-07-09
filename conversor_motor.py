@@ -1042,6 +1042,95 @@ def aplicar_marca_dagua(origem: str, destino: str, texto: str) -> None:
     except Exception as e:
         raise ConversionError(f"Erro ao aplicar marca d'água: {str(e)}")
 
+def censurar_pdf(origem: str, destino: str, texto_alvo: str) -> None:
+    try:
+        import fitz
+        doc = fitz.open(origem)
+        for page in doc:
+            areas = page.search_for(texto_alvo)
+            for area in areas:
+                page.add_redact_annot(area, fill=(0, 0, 0))
+            if areas:
+                page.apply_redactions()
+        doc.save(destino)
+        doc.close()
+    except Exception as e:
+        raise ConversionError(f"Erro ao censurar PDF: {str(e)}")
+
+def extrair_paginas_pdf(origem: str, destino: str, paginas_str: str) -> None:
+    try:
+        import fitz
+        doc_origem = fitz.open(origem)
+        doc_destino = fitz.open()
+        
+        partes = [p.strip() for p in paginas_str.split(",") if p.strip()]
+        for parte in partes:
+            if "-" in parte:
+                subpartes = parte.split("-")
+                if len(subpartes) == 2:
+                    inicio = int(subpartes[0].strip())
+                    fim = int(subpartes[1].strip())
+                    doc_destino.insert_pdf(doc_origem, from_page=inicio-1, to_page=fim-1)
+            else:
+                num = int(parte)
+                doc_destino.insert_pdf(doc_origem, from_page=num-1, to_page=num-1)
+                
+        doc_destino.save(destino)
+        doc_destino.close()
+        doc_origem.close()
+    except Exception as e:
+        raise ConversionError(f"Erro ao extrair páginas do PDF: {str(e)}")
+
+def reparar_pdf(origem: str, destino: str) -> None:
+    errors = []
+    # 1. Tenta usar o pikepdf
+    try:
+        import pikepdf
+        print(f"[INFO] Tentando reparar PDF com pikepdf: {origem}")
+        with pikepdf.open(origem) as pdf:
+            pdf.save(destino)
+            print("[INFO] PDF reparado com sucesso usando pikepdf.")
+            return
+    except Exception as e:
+        errors.append(f"pikepdf: {str(e)}")
+
+    # 2. Se o pikepdf falhar, tenta usar o PyMuPDF (fitz)
+    try:
+        import fitz
+        print(f"[INFO] pikepdf falhou. Tentando reparar PDF com PyMuPDF (fitz): {origem}")
+        doc = fitz.open(origem)
+        doc.save(destino, clean=True, garbage=4, deflate=True)
+        doc.close()
+        print("[INFO] PDF reparado com sucesso usando PyMuPDF (fitz).")
+        return
+    except Exception as e:
+        errors.append(f"PyMuPDF: {str(e)}")
+
+    # Se ambos falharem
+    raise ConversionError(f"Não foi possível reparar o PDF. Detalhes dos erros: {'; '.join(errors)}")
+
+def assinar_pdf(origem: str, destino: str, certificado_pfx: str, senha_pfx: str) -> None:
+    try:
+        from pyhanko.sign import signers
+        from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
+        
+        signer = signers.SimpleSigner.load_pkcs12(
+            pfx_file=certificado_pfx,
+            passphrase=senha_pfx.encode('utf-8')
+        )
+        
+        with open(origem, 'rb') as inf:
+            w = IncrementalPdfFileWriter(inf)
+            with open(destino, 'wb') as outf:
+                signers.sign_pdf(
+                    w,
+                    signers.PdfSignatureMetadata(field_name='Assinatura_A1'),
+                    signer=signer,
+                    output=outf
+                )
+    except Exception as e:
+        raise ConversionError(f"Erro ao assinar PDF: {str(e)}")
+
 # 9. Interface de Linha de Comando (CLI) para Testes
 if __name__ == "__main__":
     import argparse

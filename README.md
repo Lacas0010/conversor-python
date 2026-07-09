@@ -9,20 +9,37 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 
 ## 🛠️ Ferramentas Disponíveis
 
-1. **Conversão de Formatos**: Transforme CSVs para Excel, JSONs para planilhas, dados Parquet, apresentações PPT/PPTX, Word para PDF, e exporte GIFs animados a partir de vídeos.
-2. **Juntar PDFs**: Combine infinitos documentos PDF em um único arquivo de forma otimizada.
-3. **Dividir PDF**: Fatie um documento PDF em páginas únicas individuais, exportadas automaticamente via arquivo `.zip`.
-4. **Imagens para PDF**: Empacote uma série de fotos (JPG, PNG) em um arquivo PDF multipágina em questão de segundos.
-5. **PDF para Imagens**: Extraia imagens em alta qualidade das páginas do seu documento.
-6. **Segurança de PDF**: Aplique ou quebre senhas (Criptografia AES-256) para proteger arquivos sigilosos.
-7. **Extração de Tabelas (PDF)**: Transforme tabelas nativas dentro de PDFs em planilhas Excel estruturadas automaticamente.
-8. **Sanitização de Arquivos**: Limpe todo e qualquer metadado ou rastro de PDFs e Imagens, garantindo privacidade militar antes do envio.
-9. **Compressão Otimizada**: Reduza massivamente o peso de PDFs e vídeos através do motor otimizado de deflate interno.
-10. **Reconhecimento OCR Avançado**: Leia o texto contido em PDFs escaneados ou imagens e transforme num documento `.docx` usando Tesseract.
-11. **Edição Avançada de PDFs**: Rotacione páginas do documento, exclua páginas específicas (suportando intervalos como `1, 3-5`), insira numeração automática de páginas ou aplique marcas d'água de texto.
-12. **Conversão em Lote (ZIP)**: Converta vários arquivos simultaneamente em paralelo e baixe todos empacotados num único pacote `.zip`.
+O conversor possui 20 ferramentas organizadas em 4 categorias no painel lateral:
 
----
+### 1. Conversão & Extração
+* **Converter Formato**: Conversão universal individual para mais de 50 formatos (tabelas, documentos, imagens de alta resolução/RAW, áudios, vídeos com exportação de GIFs, dados espaciais e bancos de dados sqlite).
+* **Converter Lote (ZIP)**: Processamento paralelo de múltiplos arquivos, retornando um pacote `.zip` consolidado.
+* **Extrair Tabelas (PDF)**: Varre o documento PDF procurando tabelas nativas e as exporta para planilhas `.xlsx` ou `.csv` estruturadas.
+* **OCR (Texto)**: Escaneamento óptico de PDFs digitalizados ou imagens para extração de texto estruturado para arquivos `.docx` ou `.txt`.
+
+### 2. Organização de PDF
+* **Juntar PDFs**: Unificação de múltiplos arquivos PDF em um único documento, mantendo a ordem de envio.
+* **Dividir PDF**: Separação de todas as páginas de um PDF em arquivos individuais exportados em um `.zip`.
+* **Imagens p/ PDF**: Construção de um arquivo PDF multipágina a partir de uma fila de imagens (PNG, JPG, etc.).
+* **PDF p/ Imagens**: Extração de todas as páginas de um PDF como imagens em alta resolução compactadas em um `.zip`.
+
+### 3. Edição Avançada (PDF)
+* **Rotacionar PDF**: Ajuste e rotação de páginas em lote nos ângulos de 90°, 180° ou 270°.
+* **Remover Páginas**: Exclusão de páginas selecionadas do documento por números individuais ou intervalos (ex: `1, 3-5, 8`).
+* **Numerar Páginas**: Adição de numeração automática no rodapé das páginas no formato "Página X de Y".
+* **Marca d'Água**: Aplicação de marca d'água textual inclinada e semitransparente sobre todas as páginas.
+* **Extrair Páginas**: Criação de um novo PDF contendo apenas as páginas indicadas (ex: `1, 3, 5-8`).
+* **Reparar PDF**: Recuperação estrutural e de tabelas de referências cruzadas em arquivos PDF danificados ou corrompidos.
+
+### 4. Segurança & Otimização
+* **Proteger PDF**: Criptografia local de PDFs usando algoritmo robusto AES-256 e senha definida pelo usuário.
+* **Desbloquear PDF**: Remoção de senhas e restrições de edição de documentos PDF (requer senha original).
+* **Sanitizar Arquivo**: Remoção de todos os metadados ocultos de privacidade em PDFs e imagens (EXIF, autores, histórico de softwares).
+* **Comprimir Arquivo**: Redução de tamanho de arquivos PDF (otimização interna) ou vídeos pesados (via aceleração de compressão FFmpeg).
+* **Censurar PDF (Tarja Preta)**: Busca por termos ou CPFs e aplica uma tarja preta definitiva sobre os textos (adequação à LGPD).
+* **Assinar PDF (A1)**: Assinatura digital do PDF usando certificados do tipo A1 (arquivos `.pfx` ou `.p12`).
+
+
 
 ## 🚀 Como Rodar o Projeto
 
@@ -45,7 +62,7 @@ Para a conversão de apresentações (PPT/PPTX), arquivos OpenDocument (ODT) ou 
    ```
    *Ou instale-as diretamente via terminal:*
    ```bash
-   pip install fastapi uvicorn python-multipart PyMuPDF pandas openpyxl pdfplumber pytesseract Pillow python-docx docx2pdf xlrd pyarrow geopandas fiona
+   pip install fastapi uvicorn python-multipart PyMuPDF pandas openpyxl pdfplumber pytesseract Pillow python-docx docx2pdf xlrd pyarrow geopandas fiona pikepdf pyhanko
    ```
 2. Inicie o servidor FastAPI:
    ```bash
@@ -81,13 +98,22 @@ O projeto está preparado para ser empacotado num executável standalone.
 
 ```text
 conversor python/
-├── index.html            # Interface Gráfica Web Frontend (Vanilla JS + M3)
-├── server.py             # Servidor Backend (FastAPI, WebSockets, Rotas)
-├── conversor_motor.py    # Cérebro de conversões e manipulação de arquivos
-├── requirements.txt      # Lista de dependências Python
-├── ffmpeg_bin/           # (Opcional) Pasta contendo o ffmpeg.exe para compressão de mídias
-├── Tesseract-OCR/        # (Opcional) Pasta contendo o Tesseract para reconhecimento OCR
-├── LibreOfficePortable/  # (Opcional) Pasta contendo a suite portátil LibreOffice
-├── temp_uploads/         # Diretório criado automaticamente para processamento local
-└── dist/                 # Diretório criado ao compilar o .exe final
+├── index.html            # Estrutura HTML do Frontend (Material Design 3 & Glassmorphism)
+├── style.css             # Estilização CSS e efeitos visuais do Frontend
+├── script.js             # Lógica e interações do Frontend (Vanilla JS)
+├── logo.svg              # Logo da aplicação em vetor
+├── app_icon.ico          # Ícone do executável final (.exe)
+├── server.py             # Servidor Backend (FastAPI, WebSockets, Rotas API)
+├── conversor_motor.py    # Motor principal de processamento de arquivos (Python-fitz, pandas, etc.)
+├── requirements.txt      # Dependências do Python limpas e necessárias
+├── Conversor_Universal.spec # Arquivo de configuração de compilação do PyInstaller
+├── update.py             # Script de utilidade/atualização de arquivos de estilo
+├── fix_light_mode.py     # Script utilitário para correção e ajustes de cor no modo claro
+├── add_theme_toggle.py   # Script de automação para inserção do alternador de temas
+├── ffmpeg_bin/           # [Opcional] Diretório local do FFmpeg para compressão de mídia
+├── Tesseract-OCR/        # [Opcional] Diretório local do Tesseract OCR para leitura de imagens
+├── LibreOfficePortable/  # [Opcional] Diretório local do LibreOffice portátil para conversão de doc
+├── temp_uploads/         # [Temporário] Pasta gerada para upload e conversões
+└── dist/                 # [Compilado] Pasta contendo o executável standalone (.exe)
 ```
+

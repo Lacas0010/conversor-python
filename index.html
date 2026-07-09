@@ -88,9 +88,17 @@
                             <li style="margin-bottom: 8px;"><strong>Remover Páginas:</strong> Exclui páginas específicas do PDF. Digite os números das páginas ou intervalos separados por vírgula (ex: <code>1, 3-5, 8</code>).</li>
                             <li style="margin-bottom: 8px;"><strong>Numerar Páginas:</strong> Insere automaticamente o número da página (no formato "Página X de Y") no rodapé de cada folha.</li>
                             <li style="margin-bottom: 8px;"><strong>Marca d'Água:</strong> Adiciona um texto semitransparente personalizado centralizado em diagonal sobre todas as páginas do PDF.</li>
+                            <li style="margin-bottom: 8px;"><strong>Extrair Páginas:</strong> Cria um novo PDF contendo apenas as páginas indicadas (ex: <code>1, 3, 5-8</code>).</li>
+                            <li style="margin-bottom: 8px;"><strong>Reparar PDF:</strong> Reconstrói e recupera a árvore de páginas e a tabela de referências cruzadas de arquivos PDF danificados ou corrompidos.</li>
                         </ul>
 
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">11. Converter em Lote (ZIP)</h3>
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">11. Censura e Assinatura Digital</h3>
+                        <ul style="padding-left: 20px; margin-top: 8px;">
+                            <li style="margin-bottom: 8px;"><strong>Censurar PDF (Tarja Preta):</strong> Localiza nomes, números, CPFs ou palavras-chave no texto do PDF e insere uma tarja preta de censura definitiva (ideal para conformidade com a LGPD).</li>
+                            <li style="margin-bottom: 8px;"><strong>Assinar PDF (A1):</strong> Aplica uma assinatura digital no PDF usando o seu Certificado Digital A1 corporativo (arquivos <code>.pfx</code> ou <code>.p12</code>).</li>
+                        </ul>
+
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">12. Converter em Lote (ZIP)</h3>
                         <p>Selecione <strong>"Converter Lote (ZIP)"</strong> para enviar múltiplos arquivos de uma vez. O motor converterá todos de forma paralela e os agrupará em um arquivo compactado <code>.zip</code> para download rápido.</p>
                     </div>
                 </div>
@@ -140,6 +148,8 @@
                                     <button class="tool-item" data-action="Remover Páginas"><span class="material-symbols-outlined">delete_sweep</span><span class="tool-name">Remover Páginas</span></button>
                                     <button class="tool-item" data-action="Numerar Páginas"><span class="material-symbols-outlined">format_list_numbered</span><span class="tool-name">Numerar Páginas</span></button>
                                     <button class="tool-item" data-action="Adicionar Marca d'Água"><span class="material-symbols-outlined">branding_watermark</span><span class="tool-name">Marca d'Água</span></button>
+                                    <button class="tool-item" data-action="Extrair Páginas"><span class="material-symbols-outlined">file_copy</span><span class="tool-name">Extrair Páginas</span></button>
+                                    <button class="tool-item" data-action="Reparar PDF"><span class="material-symbols-outlined">healing</span><span class="tool-name">Reparar PDF</span></button>
                                 </div>
 
                                 <div class="tool-category">
@@ -148,6 +158,8 @@
                                     <button class="tool-item" data-action="Desbloquear PDF"><span class="material-symbols-outlined">lock_open</span><span class="tool-name">Desbloquear PDF</span></button>
                                     <button class="tool-item" data-action="Sanitizar Arquivo"><span class="material-symbols-outlined">cleaning_services</span><span class="tool-name">Sanitizar Arquivo</span></button>
                                     <button class="tool-item" data-action="Comprimir Arquivo"><span class="material-symbols-outlined">compress</span><span class="tool-name">Comprimir Arquivo</span></button>
+                                    <button class="tool-item" data-action="Censurar PDF (Tarja Preta)"><span class="material-symbols-outlined">visibility_off</span><span class="tool-name">Censurar (LGPD)</span></button>
+                                    <button class="tool-item" data-action="Assinar PDF"><span class="material-symbols-outlined">workspace_premium</span><span class="tool-name">Assinar PDF (A1)</span></button>
                                 </div>
                             </div>
                         </aside>
@@ -176,6 +188,16 @@
                                 </md-outlined-select>
 
                                 <md-outlined-text-field type="password" id="input-password" label="Senha do PDF" class="hidden"></md-outlined-text-field>
+
+                                <md-outlined-text-field id="input-censor" label="Palavra ou CPF a Censurar" class="hidden"></md-outlined-text-field>
+                                <md-outlined-text-field id="input-extract" label="Páginas a Extrair (ex: 2, 5-8)" class="hidden"></md-outlined-text-field>
+                                
+                                <div id="pfx-upload-container" class="hidden" style="display:flex; flex-direction:column; gap:8px;">
+                                    <span style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">Certificado Digital A1 (.pfx / .p12)</span>
+                                    <md-filled-button type="button" onclick="document.getElementById('input-pfx').click()">Selecionar Certificado</md-filled-button>
+                                    <span id="pfx-filename" style="font-size:12px; color:var(--md-sys-color-primary); text-align:center;">Nenhum selecionado</span>
+                                    <input type="file" id="input-pfx" accept=".pfx,.p12" style="display:none;" onchange="document.getElementById('pfx-filename').textContent = this.files[0] ? this.files[0].name : 'Nenhum selecionado'">
+                                </div>
 
                                 <md-outlined-text-field id="input-watermark" label="Texto da Marca (ex: CONFIDENCIAL)" value="CONFIDENCIAL" class="hidden"></md-outlined-text-field>
 

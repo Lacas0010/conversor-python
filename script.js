@@ -60,7 +60,20 @@ document.querySelectorAll('.tool-item').forEach(btn => {
         window.currentAction = targetBtn.getAttribute('data-action');
         
         // Mostra/Oculta campos na direita dependendo da ferramenta
-        document.getElementById('input-password').classList.toggle('hidden', !["Proteger PDF", "Desbloquear PDF"].includes(window.currentAction));
+        const showPassword = ["Proteger PDF", "Desbloquear PDF", "Assinar PDF"].includes(window.currentAction);
+        const passwordField = document.getElementById('input-password');
+        passwordField.classList.toggle('hidden', !showPassword);
+        
+        if (window.currentAction === "Assinar PDF") {
+            passwordField.setAttribute('label', 'Senha do Certificado A1');
+        } else {
+            passwordField.setAttribute('label', 'Senha do PDF');
+        }
+        
+        document.getElementById('input-censor').classList.toggle('hidden', window.currentAction !== "Censurar PDF (Tarja Preta)");
+        document.getElementById('input-extract').classList.toggle('hidden', window.currentAction !== "Extrair Páginas");
+        document.getElementById('pfx-upload-container').classList.toggle('hidden', window.currentAction !== "Assinar PDF");
+        
         document.getElementById('input-watermark').classList.toggle('hidden', window.currentAction !== "Adicionar Marca d'Água");
         document.getElementById('input-pages').classList.toggle('hidden', window.currentAction !== "Remover Páginas");
         document.getElementById('select-angle').classList.toggle('hidden', window.currentAction !== "Rotacionar PDF");
@@ -287,6 +300,11 @@ async function startBatchConversion() {
     const pagesToRemove = inputPages.value || '';
     const rotationAngle = parseInt(selectAngle.value) || 90;
     
+    // Novas variáveis
+    const censorText = document.getElementById('input-censor').value || '';
+    const extractPages = document.getElementById('input-extract').value || '';
+    const pfxFile = document.getElementById('input-pfx').files[0];
+    
     let successCount = 0;
     let errorsCount = 0;
 
@@ -374,6 +392,9 @@ async function startBatchConversion() {
             formData.append('marca_dagua', watermarkText);
             formData.append('paginas_remover', pagesToRemove);
             formData.append('angulo', rotationAngle);
+            formData.append('texto_censura', censorText || '');
+            formData.append('paginas_extrair', extractPages || '');
+            if (pfxFile) formData.append('certificado_pfx', pfxFile);
 
             try {
                 const response = await fetch('/api/converter', { method: 'POST', body: formData });

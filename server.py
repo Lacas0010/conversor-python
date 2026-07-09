@@ -23,7 +23,8 @@ from conversor_motor import (
     juntar_pdfs, dividir_pdf, proteger_pdf, desbloquear_pdf,
     pdf_para_imagens, imagens_para_pdf,
     extrair_tabelas_pdf, sanitizar_arquivo, comprimir_arquivo, ocr_documento,
-    rotacionar_pdf, numerar_paginas_pdf, remover_paginas_pdf, aplicar_marca_dagua
+    rotacionar_pdf, numerar_paginas_pdf, remover_paginas_pdf, aplicar_marca_dagua,
+    censurar_pdf, extrair_paginas_pdf, reparar_pdf, assinar_pdf
 )
 
 # --- CONFIGURAÇÃO FFMPEG PARA O PYINSTALLER ---
@@ -215,7 +216,10 @@ async def convert_file_stream(
     csv_delimiter: str = Form(";"),
     marca_dagua: str = Form("CONFIDENCIAL"),
     angulo: int = Form(90),
-    paginas_remover: str = Form("")
+    paginas_remover: str = Form(""),
+    certificado_pfx: UploadFile = File(None),
+    texto_censura: str = Form(""),
+    paginas_extrair: str = Form("")
 ):
     temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_uploads")
     os.makedirs(temp_dir, exist_ok=True)
@@ -390,6 +394,54 @@ async def convert_file_stream(
             with redirect_to_ws(loop):
                 await loop.run_in_executor(None, remover_paginas_pdf, input_path, output_path, paginas_remover)
             background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Censurar PDF (Tarja Preta)":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_censurado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, censurar_pdf, input_path, output_path, texto_censura)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Extrair Páginas":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_extraido.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, extrair_paginas_pdf, input_path, output_path, paginas_extrair)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Reparar PDF":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_reparado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, reparar_pdf, input_path, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+
+        elif acao == "Assinar PDF":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_assinado.pdf"
+            output_path = os.path.join(temp_dir, output_filename)
+            
+            pfx_path = None
+            if certificado_pfx and certificado_pfx.filename:
+                pfx_path = os.path.join(temp_dir, certificado_pfx.filename)
+                with open(pfx_path, "wb") as f:
+                    content = await certificado_pfx.read()
+                    f.write(content)
+            
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, assinar_pdf, input_path, output_path, pfx_path, senha)
+                
+            caminhos_a_remover = [input_path, output_path]
+            if pfx_path:
+                caminhos_a_remover.append(pfx_path)
+            background_tasks.add_task(remover_arquivos_temporarios, *caminhos_a_remover)
 
         else:
             input_path = input_paths[0]
