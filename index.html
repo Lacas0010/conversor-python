@@ -875,13 +875,7 @@
                         Ajuste os parâmetros globais do motor de conversão offline.
                     </p>
 
-                    <div class="settings-row">
-                        <div class="settings-info">
-                            <div class="settings-title">Modo Escuro</div>
-                            <div class="settings-desc">Alterna entre os temas Escuro e Claro do Material Design 3.</div>
-                        </div>
-                        <md-switch id="theme-switch" selected></md-switch>
-                    </div>
+
 
                     <div class="settings-row">
                         <div class="settings-info">
@@ -938,15 +932,7 @@
         });
 
 
-        // ------------------ Tema Claro / Escuro ------------------
-        const themeSwitch = document.getElementById('theme-switch');
-        themeSwitch.addEventListener('change', (e) => {
-            if (e.target.selected) {
-                document.documentElement.removeAttribute('data-theme');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        });
+
         
         // ------------------ Lógica do Conversor de Arquivos ------------------
         const fileInput = document.getElementById('file-input');
