@@ -1219,6 +1219,25 @@
                         window.URL.revokeObjectURL(url);
                         document.body.removeChild(a);
                         successCount++;
+
+                        // Adiciona ao Histórico de forma robusta
+                        const historyList = document.getElementById('dynamic-history-list');
+                        const emptyPlaceholder = historyList.querySelector('span.material-symbols-outlined');
+                        if (emptyPlaceholder && emptyPlaceholder.style.opacity === '0.5') {
+                            historyList.innerHTML = '';
+                        }
+                        const date = new Date().toLocaleTimeString();
+                        historyList.innerHTML = `
+                            <div class="history-item">
+                                <div class="history-meta">
+                                    <span class="status-icon">check_circle</span>
+                                    <div class="history-details">
+                                        <div class="name">${action}: ${downloadName}</div>
+                                        <div class="date">Hoje às ${date}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` + historyList.innerHTML;
                     } else {
                         const errResult = await response.json().catch(() => ({}));
                         let errLabel = action === "Converter em Lote (ZIP)" ? "Erro ao processar lote" : "Erro ao juntar PDFs";
@@ -1265,6 +1284,25 @@
                             window.URL.revokeObjectURL(url);
                             document.body.removeChild(a);
                             successCount++;
+
+                            // Adiciona ao Histórico de forma robusta
+                            const historyList = document.getElementById('dynamic-history-list');
+                            const emptyPlaceholder = historyList.querySelector('span.material-symbols-outlined');
+                            if (emptyPlaceholder && emptyPlaceholder.style.opacity === '0.5') {
+                                historyList.innerHTML = '';
+                            }
+                            const date = new Date().toLocaleTimeString();
+                            historyList.innerHTML = `
+                                <div class="history-item">
+                                    <div class="history-meta">
+                                        <span class="status-icon">check_circle</span>
+                                        <div class="history-details">
+                                            <div class="name">${action}: ${downloadName}</div>
+                                            <div class="date">Hoje às ${date}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` + historyList.innerHTML;
                         } else {
                             const errResult = await response.json().catch(() => ({}));
                             showAlert(`Erro em ${file.name}: ${errResult.message || response.statusText}`, 'error');

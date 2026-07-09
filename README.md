@@ -33,7 +33,7 @@ Para realizar conversões de áudio e vídeo (como extração de MP3 ou geraçã
 **⚠️ Pré-requisito de Documentos (LibreOffice)**
 Para a conversão de apresentações (PPT/PPTX), arquivos OpenDocument (ODT) ou para exportar PDFs a partir de documentos de texto, o motor busca por uma instalação do LibreOffice. Ele tentará localizar o `soffice` nos seguintes caminhos de forma automática:
 1. No PATH do sistema (instalação padrão do sistema).
-2. Na pasta local `LibreOfficePortable/` na raiz do projeto (ótimo para uso portátil offline).
+2. Na pasta local `LibreOfficePortable/` na raiz do projeto (durante desenvolvimento/script) ou **lado a lado com o executável final `Conversor_Universal.exe` (quando rodar via `.exe` na pasta `dist`)** para que o programa a encontre, e não dentro do código fonte.
 3. Nos caminhos padrão do Windows (`C:\Program Files\LibreOffice` ou `C:\Program Files (x86)\LibreOffice`).
 
 ### Opção 1: Via Python Script (Desenvolvimento)
@@ -41,6 +41,10 @@ Para a conversão de apresentações (PPT/PPTX), arquivos OpenDocument (ODT) ou 
 1. Instale as dependências:
    ```bash
    pip install -r requirements.txt
+   ```
+   *Ou instale-as diretamente via terminal:*
+   ```bash
+   pip install fastapi uvicorn python-multipart PyMuPDF pandas openpyxl pdfplumber piexif pytesseract Pillow python-docx docx2pdf xlrd pyarrow geopandas fiona
    ```
 2. Inicie o servidor FastAPI:
    ```bash
