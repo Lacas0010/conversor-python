@@ -11,6 +11,8 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTa
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
+import pandas as pd
+import mammoth
 
 last_heartbeat = time.time()
 server_started = False
@@ -470,6 +472,40 @@ async def convert_file_stream(
             status_code=500,
             content={"status": "error", "message": f"Erro interno no servidor: {str(e)}"}
         )
+
+@app.post("/api/preview")
+async def preview_office_file(file: UploadFile = File(...)):
+    try:
+        ext = os.path.splitext(file.filename)[1].lower()
+        content = await file.read()
+        
+        # Pré-visualização de Excel usando Pandas
+        if ext in ['.xlsx', '.xls', '.csv']:
+            import io
+            import pandas as pd
+            if ext == '.csv':
+                df = pd.read_csv(io.BytesIO(content), sep=None, engine='python', nrows=100)
+            else:
+                df = pd.read_excel(io.BytesIO(content), nrows=100) # Mostra as primeiras 100 linhas
+            
+            html_table = df.to_html(classes="preview-table", index=False, border=0)
+            custom_css = "<style>.preview-table { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 12px; color: var(--md-sys-color-on-surface); } .preview-table th { background: var(--glass-highlight); padding: 8px; text-align: left; border-bottom: 2px solid var(--md-sys-color-primary); } .preview-table td { padding: 8px; border-bottom: 1px solid var(--glass-border); }</style>"
+            return JSONResponse({"html": custom_css + html_table})
+            
+        # Pré-visualização de Word usando Mammoth
+        elif ext in ['.docx']:
+            import io
+            import mammoth
+            result = mammoth.convert_to_html(io.BytesIO(content))
+            html_content = result.value
+            custom_css = "<style>.preview-docx { padding: 20px; font-family: 'Times New Roman', serif; font-size: 14px; color: var(--md-sys-color-on-surface); line-height: 1.6; text-align: left; background: var(--glass-bg); border-radius: 8px; } .preview-docx h1, .preview-docx h2 { color: var(--md-sys-color-primary); }</style>"
+            return JSONResponse({"html": f"<div class='preview-docx'>{html_content}</div>"})
+            
+        else:
+            return JSONResponse({"error": "Formato não suportado para preview dinâmico"}, status_code=400)
+            
+    except Exception as e:
+        return JSONResponse({"error": f"Erro ao gerar preview: {str(e)}"}, status_code=500)
 
 def start_browser():
     # Aguarda 1.5 segundos para garantir que o FastAPI esteja totalmente inicializado

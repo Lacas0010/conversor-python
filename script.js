@@ -40,6 +40,189 @@ const inputPages = document.getElementById('input-pages');
 const selectAngle = document.getElementById('select-angle');
 
 let selectedFiles = [];
+let currentPreviewIndex = 0;
+let isSortingQueue = false;
+
+const previewSection = document.getElementById('preview-section');
+const previewFilename = document.getElementById('preview-filename');
+const previewCounter = document.getElementById('preview-counter');
+const previewContentContainer = document.getElementById('preview-content-container');
+const btnPrevPreview = document.getElementById('btn-prev-preview');
+const btnNextPreview = document.getElementById('btn-next-preview');
+
+function renderPreview() {
+    if (selectedFiles.length === 0) {
+        previewSection.classList.add('hidden');
+        dropzone.classList.remove('hidden');
+        return;
+    }
+
+    previewSection.classList.remove('hidden');
+    dropzone.classList.add('hidden');
+
+    const file = selectedFiles[currentPreviewIndex];
+    previewFilename.textContent = file.name;
+    previewCounter.textContent = `${currentPreviewIndex + 1} / ${selectedFiles.length}`;
+
+    btnPrevPreview.disabled = currentPreviewIndex === 0;
+    btnNextPreview.disabled = currentPreviewIndex === selectedFiles.length - 1;
+
+    const url = URL.createObjectURL(file);
+    previewContentContainer.innerHTML = '';
+
+    const extension = file.name.split('.').pop().toLowerCase();
+
+    if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.className = 'preview-element';
+        img.src = url;
+        previewContentContainer.appendChild(img);
+    } else if (file.type.startsWith('video/')) {
+        const video = document.createElement('video');
+        video.className = 'preview-element';
+        video.src = url;
+        video.controls = true;
+        previewContentContainer.appendChild(video);
+    } else if (file.type.startsWith('audio/')) {
+        const audio = document.createElement('audio');
+        audio.src = url;
+        audio.controls = true;
+        audio.style.width = '80%';
+        previewContentContainer.appendChild(audio);
+    } else if (file.type === 'application/pdf') {
+        const iframe = document.createElement('iframe');
+        iframe.className = 'preview-element';
+        iframe.src = url;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        previewContentContainer.appendChild(iframe);
+    } else if (file.type.startsWith('text/') || ['csv', 'json', 'xml', 'txt', 'md', 'html', 'js', 'css', 'py'].includes(extension)) {
+        const blobSlice = file.slice(0, 100 * 1024);
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const pre = document.createElement('pre');
+            pre.className = 'preview-text';
+            pre.textContent = text;
+            previewContentContainer.appendChild(pre);
+        };
+        reader.readAsText(blobSlice);
+    } else if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().match(/\.(xlsx|xls|csv)$/)) {
+        // Renderização dinâmica de Office via Backend
+        previewContentContainer.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+                <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-primary); animation: spin 1s linear infinite;">autorenew</span>
+                <span style="color: var(--md-sys-color-on-surface-variant);">Gerando visualização...</span>
+            </div>
+            <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+        `;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        fetch('/api/preview', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.html) {
+                previewContentContainer.innerHTML = `<div style="width:100%; height:100%; overflow:auto; padding:16px;">${data.html}</div>`;
+            } else {
+                throw new Error(data.error || "Erro desconhecido");
+            }
+        })
+        .catch(err => {
+            previewContentContainer.innerHTML = `
+                <div style="text-align:center; color: var(--md-sys-color-on-surface-variant);">
+                    <span class="material-symbols-outlined" style="font-size: 64px; opacity:0.5;">description</span>
+                    <p style="margin-top:16px;">Pré-visualização indisponível</p>
+                </div>`;
+        });
+        
+    } else {
+        // Arquivos totalmente desconhecidos (ex: .exe, .zip)
+        previewContentContainer.innerHTML = `
+            <div style="text-align:center; color: var(--md-sys-color-on-surface-variant);">
+                <span class="material-symbols-outlined" style="font-size: 64px; opacity:0.5;">draft</span>
+                <p style="margin-top:16px;">Pré-visualização nativa indisponível</p>
+            </div>`;
+    }
+}
+
+btnPrevPreview.addEventListener('click', () => {
+    if (currentPreviewIndex > 0) {
+        currentPreviewIndex--;
+        renderPreview();
+    }
+});
+
+btnNextPreview.addEventListener('click', () => {
+    if (currentPreviewIndex < selectedFiles.length - 1) {
+        currentPreviewIndex++;
+        renderPreview();
+    }
+});
+
+// Funções auxiliares para drag & drop
+const preventDefaults = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+};
+
+const handleDrop = (e) => {
+    const dt = e.dataTransfer;
+    if (dt && dt.files.length > 0) {
+        addFilesToQueue(Array.from(dt.files));
+    }
+};
+
+// 1. Ação do Botão "Mais Arquivos" no Visualizador
+const btnAddMore = document.getElementById('btn-add-more');
+if (btnAddMore) {
+    btnAddMore.addEventListener('click', () => {
+        // Simula o clique no input de arquivo original que já existe no dropzone
+        document.getElementById('file-input').click();
+    });
+}
+
+// 2. Permitir Drag & Drop diretamente em cima do Visualizador com proteção anti-iframe
+const dragOverlay = document.getElementById('preview-drag-overlay');
+
+window.addEventListener('dragenter', (e) => {
+    if (isSortingQueue) return; // Aborta se estivermos apenas reorganizando a fila interna
+
+    if (selectedFiles.length > 0 && dragOverlay) {
+        dragOverlay.style.display = 'flex';
+        dragOverlay.style.pointerEvents = 'auto'; // Ativa a película para bloquear o iframe
+    }
+});
+
+// Garante o drop seguro em cima da película protetora
+if (dragOverlay) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dragOverlay.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    dragOverlay.addEventListener('dragleave', (e) => {
+        // Esconde se o mouse sair da área de drop
+        if (e.relatedTarget === null || !dragOverlay.contains(e.relatedTarget)) {
+            dragOverlay.style.display = 'none';
+            dragOverlay.style.pointerEvents = 'none';
+        }
+    });
+
+    dragOverlay.addEventListener('drop', (e) => {
+        dragOverlay.style.display = 'none';
+        dragOverlay.style.pointerEvents = 'none';
+        handleDrop(e); // Encaminha os novos arquivos para a fila existente
+    });
+}
+
 
 // Lógica de Expandir/Recolher Sidebar
 const toolsSidebar = document.getElementById('tools-sidebar');
@@ -117,12 +300,27 @@ function addFilesToQueue(files) {
     });
     renderQueue();
     updateControlsState();
+    
+    if (selectedFiles.length > 0) {
+        if (currentPreviewIndex >= selectedFiles.length) {
+            currentPreviewIndex = selectedFiles.length - 1;
+        }
+    } else {
+        currentPreviewIndex = 0;
+    }
+    renderPreview();
 }
 
 function removeFileFromQueue(index) {
     selectedFiles.splice(index, 1);
+    
+    if (currentPreviewIndex >= selectedFiles.length) {
+        currentPreviewIndex = Math.max(0, selectedFiles.length - 1);
+    }
+    
     renderQueue();
     updateControlsState();
+    renderPreview();
 }
 
 function renderQueue() {
@@ -165,7 +363,11 @@ function renderQueue() {
         handle: '.drag-handle',
         animation: 150,
         ghostClass: 'sortable-ghost',
+        onStart: function (evt) {
+            isSortingQueue = true;
+        },
         onEnd: function (evt) {
+            isSortingQueue = false;
             const newFiles = [];
             const items = fileQueue.querySelectorAll('.queue-item');
             items.forEach(item => {
@@ -175,6 +377,7 @@ function renderQueue() {
             selectedFiles = newFiles;
             renderQueue();
             updateControlsState();
+            renderPreview();
         }
     });
 }
@@ -463,8 +666,10 @@ async function startBatchConversion() {
         }
         // Limpa a fila automaticamente
         selectedFiles = [];
+        currentPreviewIndex = 0;
         renderQueue();
         updateControlsState();
+        renderPreview();
     } else if (successCount > 0) {
         showAlert(`<strong>Conversão concluída com avisos</strong><br>Sucesso: ${successCount} | Falhas: ${errorsCount}. Verifique os alertas exibidos.`, 'error');
     }

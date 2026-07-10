@@ -100,6 +100,9 @@
 
                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">12. Converter em Lote (ZIP)</h3>
                         <p>Selecione <strong>"Converter Lote (ZIP)"</strong> para enviar múltiplos arquivos de uma vez. O motor converterá todos de forma paralela e os agrupará em um arquivo compactado <code>.zip</code> para download rápido.</p>
+
+                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">13. Visualização (Preview) de Arquivos</h3>
+                        <p>Ao arrastar ou selecionar arquivos para a aplicação, a área central se transforma em um <strong>Visualizador Dinâmico Inteligente</strong>. Formatos comuns como imagens, vídeos, áudios e PDFs são exibidos instantaneamente utilizando a memória RAM local. Formatos corporativos do Office (Word <code>.docx</code>, planilhas Excel <code>.xlsx</code>/<code>.xls</code> e arquivos delimitados <code>.csv</code>) contam com renderização dinâmica gerada sob demanda localmente pelo backend offline.</p>
                     </div>
                 </div>
             </section>
@@ -108,10 +111,6 @@
             <section id="view-conversor" class="view">
                 <div class="dashboard-layout">
                     <div class="dashboard-card">
-                        <header>
-                            <h1><span class="icon">shield</span> Conversor de Arquivos</h1>
-                            <p>Conversor offline de dados estruturados, tabelas, imagens e mídias</p>
-                        </header>
 
                     <!-- Input oculto para arquivos multiplos -->
                     <input type="file" id="file-input" multiple>
@@ -172,8 +171,38 @@
                                 <div class="secondary-text">Suporta múltiplos documentos, tabelas, imagens e mídias</div>
                             </div>
 
-                            <!-- Fila de arquivos selecionados -->
-                            <div id="file-queue"></div>
+                            <div id="preview-section" class="hidden" style="flex: 1; display: flex; flex-direction: column; background: var(--md-sys-color-surface-variant); border: 1px solid var(--glass-border); border-radius: 24px; padding: 16px; min-height: 0; position: relative;">
+                                <div id="preview-drag-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(56, 189, 248, 0.08); border: 2px dashed var(--md-sys-color-primary); border-radius: 24px; display: none; align-items: center; justify-content: center; z-index: 99; pointer-events: none;">
+                                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-primary);">upload_file</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 16px; flex-shrink: 0;">
+                                    <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); flex-shrink: 0;">visibility</span>
+                                        <span id="preview-filename" style="font-weight: 600; font-size: 15px; color: var(--md-sys-color-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;">nome_do_arquivo.ext</span>
+                                    </div>
+                                    
+                                    <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+                                        <button id="btn-add-more" style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; border-radius: 8px; padding: 6px 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s;">
+                                            <span class="material-symbols-outlined" style="font-size: 18px;">add_circle</span> Mais Arquivos
+                                        </button>
+                                        <span id="preview-counter" style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); font-weight: 500;">1 / 1</span>
+                                    </div>
+                                </div>
+
+                                <div style="flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 0;">
+                                    <button id="btn-prev-preview" class="nav-arrow" title="Arquivo Anterior">
+                                        <span class="material-symbols-outlined">chevron_left</span>
+                                    </button>
+
+                                    <div id="preview-content-container" style="flex: 1; display: flex; justify-content: center; align-items: center; height: 100%; overflow: hidden; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                                        </div>
+
+                                    <button id="btn-next-preview" class="nav-arrow" title="Próximo Arquivo">
+                                        <span class="material-symbols-outlined">chevron_right</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Coluna 2: Inspector -->
@@ -210,6 +239,9 @@
                                 </md-outlined-select>
 
                                 <md-outlined-text-field label="Delimitador" value=";" id="delimiter-field" disabled></md-outlined-text-field>
+                                
+                                <!-- Fila de arquivos selecionados -->
+                                <div id="file-queue"></div>
                             </div>
 
                             <!-- Progresso da Conversão -->

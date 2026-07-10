@@ -46,5 +46,6 @@ desktop.ini
 *.njsproj
 *.sln
 *.swp
-
-
+# Configurações do Gemini/Agentes
+.gemini/
+.agents/

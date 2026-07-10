@@ -88,9 +88,11 @@ O projeto está preparado para ser empacotado num executável standalone.
 
 ## ⚡ Arquitetura e Recursos Avançados
 
+- **Visualizador Dinâmico Inteligente:** Área integrada na workspace principal que renderiza previews em tempo real na memória RAM (via URLs de Blob) para imagens, áudio, vídeo e PDFs, além de renderizar de forma instantânea planilhas (`.xlsx`, `.xls`, `.csv`) e documentos Word (`.docx`) com o auxílio do backend local (`pandas` e `mammoth`).
+- **Película Protetora Anti-Iframe:** Camada invisível de captura de mouse que impede que iframes (como o leitor de PDF) interceptem eventos de arrastar e soltar (Drag & Drop), mantendo a experiência de carregamento de arquivos fluida.
 - **Encerramento Inteligente (Heartbeat):** Ao rodar via executável, o backend possui uma conexão WebSocket contínua com a aba do navegador. Quando o usuário fecha a aba, o servidor detecta a desconexão e encerra o processo do Python na hora de forma segura.
-- **Glassmorphism & Material Design 3:** A interface `index.html` foi totalmente reescrita em Vanilla JS sem frameworks pesados, aplicando um design luxuoso, modo noturno dinâmico e micro-interações fluidas.
-- **Log em Tempo Real:** As saídas do backend são transmitidas via WebSocket diretamente para a UI, permitindo visualizar logs do motor de processamento no próprio navegador.
+- **Glassmorphism & Material Design 3:** A interface `index.html` foi reescrita com Material Design 3 em Vanilla JS com estética luxuosa de vidro, modo noturno dinâmico e micro-animações.
+- **Log em Tempo Real:** Transmissão de logs de execução do backend diretamente para o console do terminal web no navegador via WebSockets.
 
 ---
 
