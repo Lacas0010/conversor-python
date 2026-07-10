@@ -9,7 +9,7 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 
 ## 🛠️ Ferramentas Disponíveis
 
-O conversor possui 22 ferramentas organizadas em 4 categorias no painel lateral:
+O conversor possui 23 ferramentas organizadas em 4 categorias no painel lateral:
 
 ### 1. Conversão & Extração
 * **Converter Formato**: Conversão universal individual para mais de 50 formatos (tabelas, documentos, imagens de alta resolução/RAW, áudios, vídeos com exportação de GIFs, dados espaciais e bancos de dados sqlite).
@@ -20,6 +20,7 @@ O conversor possui 22 ferramentas organizadas em 4 categorias no painel lateral:
 
 ### 2. Organização de PDF
 * **Juntar PDFs**: Unificação de múltiplos arquivos PDF em um único documento, mantendo a ordem de envio.
+* **Juntar DOCX**: Combinação de múltiplos documentos Word (`.docx`) em um único arquivo consolidado, mantendo a ordem de envio.
 * **Dividir PDF**: Separação de todas as páginas de um PDF em arquivos individuais exportados em um `.zip`.
 * **Imagens p/ PDF**: Construção de um arquivo PDF multipágina a partir de uma fila de imagens (PNG, JPG, etc.).
 * **PDF p/ Imagens**: Extração de todas as páginas de um PDF como imagens em alta resolução compactadas em um `.zip`.

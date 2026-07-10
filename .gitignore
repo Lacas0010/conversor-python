@@ -27,6 +27,11 @@ temp_uploads/
 *.p12
 *.pem
 *.key
+*.tmp
+*.bak
+*.db
+*.sqlite
+*.sqlite3
 
 # Binários de Terceiros
 ffmpeg_bin/
