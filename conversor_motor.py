@@ -995,28 +995,46 @@ def remover_paginas_pdf(origem: str, destino: str, paginas_str: str) -> None:
         import fitz
         doc = fitz.open(origem)
         paginas_a_remover = set()
+        total_paginas = len(doc)
         
         partes = [p.strip() for p in paginas_str.split(",") if p.strip()]
+        if not partes:
+            raise ConversionError("Nenhuma página informada para remoção. Insira pelo menos um número de página.")
+
         for parte in partes:
-            if "-" in parte:
-                subpartes = parte.split("-")
-                if len(subpartes) == 2:
-                    inicio = int(subpartes[0].strip())
-                    fim = int(subpartes[1].strip())
-                    for p_num in range(inicio, fim + 1):
-                        paginas_a_remover.add(p_num - 1)
-            else:
-                paginas_a_remover.add(int(parte) - 1)
+            try:
+                if "-" in parte:
+                    subpartes = parte.split("-")
+                    if len(subpartes) == 2:
+                        inicio = int(subpartes[0].strip())
+                        fim = int(subpartes[1].strip())
+                        if inicio <= 0 or fim <= 0:
+                            raise ConversionError("Os números de páginas devem ser maiores que zero.")
+                        if inicio > fim:
+                            raise ConversionError(f"Intervalo inválido ({inicio}-{fim}). O início deve ser menor ou igual ao fim.")
+                        for p_num in range(inicio, fim + 1):
+                            paginas_a_remover.add(p_num - 1)
+                    else:
+                        raise ConversionError(f"Intervalo de páginas inválido: '{parte}'")
+                else:
+                    p_num = int(parte)
+                    if p_num <= 0:
+                        raise ConversionError("Os números de páginas devem ser maiores que zero.")
+                    paginas_a_remover.add(p_num - 1)
+            except ValueError:
+                raise ConversionError(f"Valor inválido encontrado: '{parte}'. Certifique-se de preencher apenas números inteiros maiores que zero (Ex: 1, 3-5, 8).")
         
-        total_paginas = len(doc)
         indices_validos = sorted(
             [p for p in paginas_a_remover if 0 <= p < total_paginas],
             reverse=True
         )
         
+        if not indices_validos:
+            raise ConversionError(f"Nenhuma das páginas informadas ({paginas_str}) existe no documento. O PDF possui apenas {total_paginas} página(s).")
+
         if len(indices_validos) == total_paginas:
             doc.close()
-            raise ConversionError("Não é permitido remover todas as páginas do PDF.")
+            raise ConversionError("Não é permitido remover todas as páginas do PDF. O documento precisa ter pelo menos 1 página restante.")
             
         for p in indices_validos:
             doc.delete_page(p)
@@ -1062,23 +1080,44 @@ def extrair_paginas_pdf(origem: str, destino: str, paginas_str: str) -> None:
         import fitz
         doc_origem = fitz.open(origem)
         doc_destino = fitz.open()
+        total_paginas = len(doc_origem)
         
         partes = [p.strip() for p in paginas_str.split(",") if p.strip()]
+        if not partes:
+            raise ConversionError("Nenhuma página informada para extração. Insira pelo menos um número de página.")
+
         for parte in partes:
-            if "-" in parte:
-                subpartes = parte.split("-")
-                if len(subpartes) == 2:
-                    inicio = int(subpartes[0].strip())
-                    fim = int(subpartes[1].strip())
-                    doc_destino.insert_pdf(doc_origem, from_page=inicio-1, to_page=fim-1)
-            else:
-                num = int(parte)
-                doc_destino.insert_pdf(doc_origem, from_page=num-1, to_page=num-1)
+            try:
+                if "-" in parte:
+                    subpartes = parte.split("-")
+                    if len(subpartes) == 2:
+                        inicio = int(subpartes[0].strip())
+                        fim = int(subpartes[1].strip())
+                        if inicio <= 0 or fim <= 0:
+                            raise ConversionError("Os números de páginas devem ser maiores que zero.")
+                        if inicio > total_paginas or fim > total_paginas:
+                            raise ConversionError(f"Página fora dos limites do documento. O PDF possui apenas {total_paginas} página(s).")
+                        if inicio > fim:
+                            raise ConversionError(f"Intervalo inválido ({inicio}-{fim}). O início deve ser menor ou igual ao fim.")
+                        doc_destino.insert_pdf(doc_origem, from_page=inicio-1, to_page=fim-1)
+                    else:
+                        raise ConversionError(f"Intervalo de páginas inválido: '{parte}'")
+                else:
+                    num = int(parte)
+                    if num <= 0:
+                        raise ConversionError("Os números de páginas devem ser maiores que zero.")
+                    if num > total_paginas:
+                        raise ConversionError(f"Página {num} fora dos limites do documento. O PDF possui apenas {total_paginas} página(s).")
+                    doc_destino.insert_pdf(doc_origem, from_page=num-1, to_page=num-1)
+            except ValueError:
+                raise ConversionError(f"Valor inválido encontrado: '{parte}'. Certifique-se de preencher apenas números inteiros maiores que zero (Ex: 1, 3-5, 8).")
                 
         doc_destino.save(destino)
         doc_destino.close()
         doc_origem.close()
     except Exception as e:
+        if isinstance(e, ConversionError):
+            raise e
         raise ConversionError(f"Erro ao extrair páginas do PDF: {str(e)}")
 
 def reparar_pdf(origem: str, destino: str) -> None:

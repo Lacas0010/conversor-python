@@ -689,6 +689,155 @@ async function startBatchConversion() {
     }
 }
 
+function translateError(errorMsg) {
+    const errorObj = {
+        title: "Ocorreu um erro no processamento",
+        description: "Não foi possível concluir a ação devido a um problema inesperado no servidor.",
+        tip: "Certifique-se de que o arquivo enviado não está corrompido e de que o formato de destino é compatível.",
+        original: errorMsg
+    };
+
+    if (!errorMsg || typeof errorMsg !== 'string') {
+        return errorObj;
+    }
+
+    const cleanMsg = errorMsg.toLowerCase();
+
+    // 1. Conexão / Rede / Servidor local desligado
+    if (cleanMsg.includes("failed to fetch") || cleanMsg.includes("erro ao conectar") || cleanMsg.includes("falha de rede") || cleanMsg.includes("network error") || cleanMsg.includes("localhost") || cleanMsg.includes("127.0.0.1")) {
+        errorObj.title = "Falha de Conexão com o Servidor Local";
+        errorObj.description = "Não foi possível se comunicar com o motor de conversão que roda na sua máquina.";
+        errorObj.tip = "Verifique se você abriu o programa executável (ou rodou <code>python server.py</code> no terminal). Se o programa estiver aberto, feche-o e tente abri-lo novamente para reiniciar o servidor local.";
+        return errorObj;
+    }
+
+    // 2. Senhas do PDF
+    if (cleanMsg.includes("senha incorreta") || cleanMsg.includes("password") || cleanMsg.includes("incorrect password") || cleanMsg.includes("authenticate")) {
+        errorObj.title = "Senha do PDF Incorreta";
+        errorObj.description = "O arquivo PDF enviado está protegido por criptografia e a senha fornecida não é válida.";
+        errorObj.tip = "Por favor, digite a senha correta no campo correspondente antes de iniciar o processo de desbloqueio ou assinatura.";
+        return errorObj;
+    }
+
+    // 3. Validação de Intervalos de Páginas
+    if (cleanMsg.includes("valor inválido encontrado") || cleanMsg.includes("invalid literal") || cleanMsg.includes("remover páginas") || cleanMsg.includes("extrair páginas")) {
+        errorObj.title = "Intervalo de Páginas Inválido";
+        errorObj.description = "O formato das páginas informado é inválido ou contém letras/símbolos não permitidos.";
+        errorObj.tip = "Use apenas números inteiros maiores que zero e hifens para especificar intervalos de páginas, separados por vírgula. Exemplos válidos: <code>1</code>, <code>3-5</code> ou <code>1, 3-5, 8</code>.";
+        return errorObj;
+    }
+
+    // 4. Fora de Limites
+    if (cleanMsg.includes("fora dos limites do documento") || cleanMsg.includes("page number out of range")) {
+        errorObj.title = "Página Inexistente";
+        errorObj.description = "Um ou mais números de página indicados são maiores do que o número total de páginas que este documento possui.";
+        errorObj.tip = "Abra o documento PDF e confirme a quantidade total de páginas antes de selecionar quais quer extrair ou remover.";
+        return errorObj;
+    }
+
+    // 5. Remover todas as páginas do PDF
+    if (cleanMsg.includes("remover todas as páginas")) {
+        errorObj.title = "Não é Permitido Esvaziar o PDF";
+        errorObj.description = "Você tentou remover todas as páginas deste documento PDF.";
+        errorObj.tip = "Um documento PDF precisa ter ao menos uma página. Se o seu objetivo é deletar o arquivo do computador, você pode fazer isso diretamente pelo Explorador de Arquivos.";
+        return errorObj;
+    }
+
+    // 6. FFmpeg ausente
+    if (cleanMsg.includes("ffmpeg não encontrado") || cleanMsg.includes("ffmpeg_bin")) {
+        errorObj.title = "Motor de Áudio e Vídeo (FFmpeg) Ausente";
+        errorObj.description = "O programa precisa do utilitário complementar 'FFmpeg' para poder compactar, converter ou extrair áudio e vídeo.";
+        errorObj.tip = "Crie uma pasta chamada <code>ffmpeg_bin</code> na pasta onde o conversor está instalado e coloque o arquivo <code>ffmpeg.exe</code> dentro dela, ou instale o FFmpeg nas variáveis de ambiente do seu Windows.";
+        return errorObj;
+    }
+
+    // 7. Falha de execução no FFmpeg (arquivo corrompido, etc)
+    if (cleanMsg.includes("erro do ffmpeg") || cleanMsg.includes("retcode") || cleanMsg.includes("returncode")) {
+        errorObj.title = "Erro no Processamento do Vídeo/Áudio";
+        errorObj.description = "O motor local de mídia (FFmpeg) encontrou um problema ao ler ou converter o seu arquivo.";
+        errorObj.tip = "Verifique se o vídeo ou áudio não está corrompido. Certifique-se de que ele abre e reproduz normalmente em outros programas do seu computador.";
+        return errorObj;
+    }
+
+    // 8. LibreOffice ausente
+    if (cleanMsg.includes("libreoffice não foi encontrado") || cleanMsg.includes("soffice") || cleanMsg.includes("libreoffice")) {
+        errorObj.title = "Motor de Documentos (LibreOffice) Ausente";
+        errorObj.description = "O conversor necessita do LibreOffice para converter arquivos do Microsoft Office (como DOC, DOCX, PPT, PPTX) para outros formatos.";
+        errorObj.tip = "Instale o LibreOffice no seu computador ou, caso queira utilizá-lo de forma portátil sem instalar, crie uma pasta chamada <code>LibreOfficePortable</code> contendo os arquivos dele dentro da pasta do conversor.";
+        return errorObj;
+    }
+
+    // 9. Bibliotecas Python faltantes
+    if (cleanMsg.includes("pillow")) {
+        errorObj.title = "Módulo de Imagens Ausente (Pillow)";
+        errorObj.description = "Falta um pacote de processamento de imagem no servidor local.";
+        errorObj.tip = "Para resolver, abra o terminal no seu ambiente de desenvolvimento e execute: <code>pip install Pillow</code>.";
+        return errorObj;
+    }
+    if (cleanMsg.includes("pandas") || cleanMsg.includes("openpyxl") || cleanMsg.includes("xlrd") || cleanMsg.includes("pyarrow")) {
+        errorObj.title = "Módulo de Planilhas Ausente (Pandas)";
+        errorObj.description = "Falta um pacote necessário para manipulação de planilhas e dados estruturados.";
+        errorObj.tip = "Para resolver, abra o terminal no seu ambiente de desenvolvimento e execute: <code>pip install pandas openpyxl xlrd pyarrow</code>.";
+        return errorObj;
+    }
+    if (cleanMsg.includes("pdf2docx")) {
+        errorObj.title = "Módulo de Conversão PDF para Word Ausente";
+        errorObj.description = "O pacote necessário para converter PDFs diretamente em Word (.docx) não está instalado.";
+        errorObj.tip = "Para resolver, abra o terminal no seu ambiente de desenvolvimento e execute: <code>pip install pdf2docx</code>.";
+        return errorObj;
+    }
+    if (cleanMsg.includes("python-docx")) {
+        errorObj.title = "Módulo de Word Ausente (python-docx)";
+        errorObj.description = "Falta um pacote necessário para ler ou gerar arquivos de texto do Microsoft Word.";
+        errorObj.tip = "Para resolver, abra o terminal no seu ambiente de desenvolvimento e execute: <code>pip install python-docx</code>.";
+        return errorObj;
+    }
+    if (cleanMsg.includes("odfpy")) {
+        errorObj.title = "Módulo de Planilhas ODS Ausente";
+        errorObj.description = "O leitor de planilhas LibreOffice (.ods) não está instalado.";
+        errorObj.tip = "Para resolver, abra o terminal no seu ambiente de desenvolvimento e execute: <code>pip install odfpy</code>.";
+        return errorObj;
+    }
+    if (cleanMsg.includes("pyyaml")) {
+        errorObj.title = "Módulo YAML Ausente";
+        errorObj.description = "Falta o pacote necessário para ler ou gerar arquivos no formato YAML.";
+        errorObj.tip = "Para resolver, abra o terminal no seu ambiente de desenvolvimento e execute: <code>pip install PyYAML</code>.";
+        return errorObj;
+    }
+    if (cleanMsg.includes("pyhanko")) {
+        errorObj.title = "Módulo de Assinatura Digital Ausente";
+        errorObj.description = "O pacote de criptografia necessário para assinar PDFs digitalmente não foi encontrado no servidor.";
+        errorObj.tip = "Para resolver, abra o terminal no seu ambiente de desenvolvimento e execute: <code>pip install pyhanko</code>.";
+        return errorObj;
+    }
+
+    // 10. Conversão não suportada
+    if (cleanMsg.includes("não é suportada") || cleanMsg.includes("operação não permitida") || cleanMsg.includes("destino desconhecido")) {
+        errorObj.title = "Conversão Não Suportada";
+        errorObj.description = "O conversor não suporta transformar este tipo de arquivo específico no formato de destino selecionado.";
+        errorObj.tip = "Consulte o guia de ajuda (aba <strong>'Como Usar'</strong> no topo do painel) para verificar a lista de formatos compatíveis.";
+        return errorObj;
+    }
+
+    // 11. Banco SQLite vazio
+    if (cleanMsg.includes("nenhuma tabela de usuário encontrada")) {
+        errorObj.title = "Banco de Dados sem Tabelas";
+        errorObj.description = "Este banco de dados SQLite não possui tabelas criadas com dados legíveis para exportação.";
+        errorObj.tip = "Certifique-se de que o arquivo enviado é um banco de dados válido e possui dados inseridos em tabelas de usuário.";
+        return errorObj;
+    }
+
+    // 12. Erro genérico do motor
+    if (cleanMsg.includes("erro de conversão") || cleanMsg.includes("erro de processamento") || cleanMsg.includes("falha ao processar")) {
+        errorObj.title = "Falha no Processamento do Arquivo";
+        errorObj.description = "O motor de conversão não conseguiu processar este arquivo.";
+        errorObj.tip = "Certifique-se de que o arquivo não está corrompido, correndo ou protegido por uma senha de leitura.";
+        return errorObj;
+    }
+
+    return errorObj;
+}
+
 function downloadFile(filename) {
     window.location.href = `/api/download/${filename}`;
 }
@@ -696,7 +845,37 @@ function downloadFile(filename) {
 function showAlert(msg, type) {
     statusAlert.style.display = 'block';
     statusAlert.className = 'status-alert ' + type;
-    statusAlert.innerHTML = msg;
+    
+    if (type === 'error') {
+        const errorObj = translateError(msg);
+        statusAlert.innerHTML = `
+            <div class="alert-content-wrapper">
+                <div class="alert-header">
+                    <span class="material-symbols-outlined alert-icon" style="color: var(--md-sys-color-error);">error</span>
+                    <span class="alert-title">${errorObj.title}</span>
+                </div>
+                <div class="alert-body">
+                    <p class="alert-description">${errorObj.description}</p>
+                    ${errorObj.tip ? `<p class="alert-tip"><strong>💡 Dica:</strong> ${errorObj.tip}</p>` : ''}
+                </div>
+                <details class="alert-details">
+                    <summary>Informações técnicas para suporte</summary>
+                    <code>${errorObj.original}</code>
+                </details>
+            </div>
+        `;
+    } else {
+        let icon = type === 'success' ? 'check_circle' : 'info';
+        let iconColor = type === 'success' ? '#34d399' : 'var(--md-sys-color-primary)';
+        statusAlert.innerHTML = `
+            <div class="alert-content-wrapper">
+                <div class="alert-header" style="align-items: center;">
+                    <span class="material-symbols-outlined alert-icon" style="color: ${iconColor}; margin-right: 12px;">${icon}</span>
+                    <div style="flex: 1; line-height: 1.4;">${msg}</div>
+                </div>
+            </div>
+        `;
+    }
 }
 
 // Limpa notificações
