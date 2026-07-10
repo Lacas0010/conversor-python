@@ -234,6 +234,16 @@ toggleSidebarBtn.addEventListener('click', () => {
     icon.textContent = toolsSidebar.classList.contains('collapsed') ? 'menu' : 'menu_open';
 });
 
+// Configuração dos controles de lote (Agrupado vs 1-para-1)
+const batchToggles = {
+    "Converter Formato": { show: true, default: false, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos convertidos em um único ZIP" },
+    "Converter em Lote (ZIP)": { show: true, default: true, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos convertidos em um único ZIP" },
+    "Imagens para PDF": { show: true, default: true, title: "Juntar em um único PDF", desc: "Unir todas as imagens em um PDF ou criar um PDF por imagem" },
+    "Extrair Tabelas (PDF)": { show: true, default: false, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todas as planilhas extraídas em um único ZIP" },
+    "Reconhecimento OCR": { show: true, default: false, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos de texto do OCR em um único ZIP" },
+    "Renomear em Lote (ZIP)": { show: true, default: true, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos renomeados em um único ZIP" }
+};
+
 // Lógica de Seleção de Ferramenta
 document.querySelectorAll('.tool-item').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -262,6 +272,22 @@ document.querySelectorAll('.tool-item').forEach(btn => {
         document.getElementById('select-angle').classList.toggle('hidden', window.currentAction !== "Rotacionar PDF");
         document.getElementById('input-mb').classList.toggle('hidden', window.currentAction !== "Fatiar PDF por Tamanho");
         document.getElementById('input-rename').classList.toggle('hidden', window.currentAction !== "Renomear em Lote (ZIP)");
+        
+        const batchGroupContainer = document.getElementById('batch-group-container');
+        if (batchGroupContainer) {
+            const config = batchToggles[window.currentAction];
+            if (config) {
+                batchGroupContainer.classList.remove('hidden');
+                document.getElementById('batch-group-title').textContent = config.title;
+                document.getElementById('batch-group-desc').textContent = config.desc;
+                const switchEl = document.getElementById('input-batch-group');
+                if (switchEl) {
+                    switchEl.selected = config.default;
+                }
+            } else {
+                batchGroupContainer.classList.add('hidden');
+            }
+        }
         
         updateControlsState();
     });
@@ -499,7 +525,7 @@ async function startBatchConversion() {
 
     const selectedFormat = formatSelect.value;
     const delimiter = delimiterField.value || ';';
-    const action = window.currentAction;
+    let action = window.currentAction;
     const password = inputPassword.value;
     const watermarkText = inputWatermark.value || 'CONFIDENCIAL';
     const pagesToRemove = inputPages.value || '';
@@ -515,20 +541,60 @@ async function startBatchConversion() {
     let successCount = 0;
     let errorsCount = 0;
 
-    const isBatchAction = ["Converter em Lote (ZIP)", "Juntar PDFs", "Renomear em Lote (ZIP)"].includes(action);
+    // Detecta se é para agrupar em arquivo único ou processar individualmente (1-para-1)
+    const batchGroupSwitch = document.getElementById('input-batch-group');
+    const groupResults = batchGroupSwitch ? batchGroupSwitch.selected : true;
+    
+    const originalAction = action;
+    let selectedFormatOverride = selectedFormat;
+
+    // Se a ação for Imagens para PDF mas o usuário escolheu não juntar
+    if (action === "Imagens para PDF" && !groupResults) {
+        action = "Converter em Lote (ZIP)";
+        selectedFormatOverride = ".pdf";
+    }
+
+    // Se for Converter Formato e o usuário optou por Agrupar em ZIP
+    if (action === "Converter Formato" && groupResults) {
+        action = "Converter em Lote (ZIP)";
+    }
+
+    // Determina se forçaremos o loop de processamento individual um por um no frontend
+    let forceIndividualLoop = false;
+    if (!groupResults) {
+        if (action === "Converter em Lote (ZIP)") {
+            if (originalAction !== "Imagens para PDF") {
+                action = "Converter Formato";
+                forceIndividualLoop = true;
+            }
+        } else if (action === "Renomear em Lote (ZIP)" || action === "Extrair Tabelas (PDF)" || action === "Reconhecimento OCR") {
+            forceIndividualLoop = true;
+        }
+    }
+
+    // Ferramentas que processam lote direto no backend (quando agrupado)
+    const isBatchAction = !forceIndividualLoop && [
+        "Converter em Lote (ZIP)", "Juntar PDFs", "Renomear em Lote (ZIP)", "Imagens para PDF", "Extrair Tabelas (PDF)", "Reconhecimento OCR"
+    ].includes(action);
 
     if (isBatchAction) {
-        let progressText = `Juntando ${selectedFiles.length} arquivos...`;
+        let progressText = `Processando ${selectedFiles.length} arquivos...`;
         if (action === "Converter em Lote (ZIP)") {
             progressText = `Convertendo e compactando ${selectedFiles.length} arquivos em lote...`;
         } else if (action === "Renomear em Lote (ZIP)") {
-            progressText = `Renomeando ${selectedFiles.length} arquivos em lote...`;
+            progressText = `Renomeando e compactando ${selectedFiles.length} arquivos em lote...`;
+        } else if (action === "Imagens para PDF") {
+            progressText = `Combinando ${selectedFiles.length} imagens em um único PDF...`;
+        } else if (action === "Extrair Tabelas (PDF)") {
+            progressText = `Extraindo tabelas de ${selectedFiles.length} PDFs em lote...`;
+        } else if (action === "Reconhecimento OCR") {
+            progressText = `Executando OCR em ${selectedFiles.length} arquivos em lote...`;
         }
         document.getElementById('progress-label').textContent = progressText;
 
         const formData = new FormData();
         formData.append('acao', action);
-        if (selectedFormat) formData.append('formato_saida', selectedFormat);
+        if (selectedFormatOverride) formData.append('formato_saida', selectedFormatOverride);
         if (delimiter) formData.append('csv_delimiter', delimiter);
         if (password) formData.append('senha', password);
         formData.append('marca_dagua', watermarkText);
@@ -553,9 +619,13 @@ async function startBatchConversion() {
                 if (action === "Imagens para PDF") {
                     downloadName = "imagens_juntas.pdf";
                 } else if (action === "Converter em Lote (ZIP)") {
-                    downloadName = "lote_convertido.zip";
+                    downloadName = (originalAction === "Imagens para PDF") ? "imagens_individuais.zip" : "lote_convertido.zip";
                 } else if (action === "Renomear em Lote (ZIP)") {
                     downloadName = "lote_renomeado.zip";
+                } else if (action === "Extrair Tabelas (PDF)") {
+                    downloadName = "tabelas_extraidas.zip";
+                } else if (action === "Reconhecimento OCR") {
+                    downloadName = "ocr_lote.zip";
                 }
                 
                 a.download = downloadName;
@@ -577,7 +647,7 @@ async function startBatchConversion() {
                         <div class="history-meta">
                             <span class="status-icon">check_circle</span>
                             <div class="history-details">
-                                <div class="name">${action}: ${downloadName}</div>
+                                <div class="name">${originalAction}: ${downloadName}</div>
                                 <div class="date">Hoje às ${date}</div>
                             </div>
                         </div>
@@ -585,7 +655,12 @@ async function startBatchConversion() {
                 ` + historyList.innerHTML;
             } else {
                 const errResult = await response.json().catch(() => ({}));
-                let errLabel = action === "Converter em Lote (ZIP)" ? "Erro ao processar lote" : (action === "Renomear em Lote (ZIP)" ? "Erro ao renomear arquivos" : "Erro ao juntar PDFs");
+                let errLabel = "Erro no processamento";
+                if (action === "Converter em Lote (ZIP)") errLabel = "Erro ao processar lote";
+                else if (action === "Renomear em Lote (ZIP)") errLabel = "Erro ao renomear arquivos";
+                else if (action === "Imagens para PDF") errLabel = "Erro ao combinar imagens";
+                else if (action === "Extrair Tabelas (PDF)") errLabel = "Erro ao extrair tabelas";
+                else if (action === "Reconhecimento OCR") errLabel = "Erro no OCR";
                 showAlert(`${errLabel}: ${errResult.message || response.statusText}`, 'error');
                 errorsCount++;
             }
@@ -650,7 +725,7 @@ async function startBatchConversion() {
                             <div class="history-meta">
                                 <span class="status-icon">check_circle</span>
                                 <div class="history-details">
-                                    <div class="name">${action}: ${downloadName}</div>
+                                    <div class="name">${originalAction}: ${downloadName}</div>
                                     <div class="date">Hoje às ${date}</div>
                                 </div>
                             </div>

@@ -309,14 +309,32 @@ async def convert_file_stream(
             background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
             
         elif acao == "Extrair Tabelas (PDF)":
-            input_path = input_paths[0]
-            name = os.path.splitext(os.path.basename(input_path))[0]
-            ext_saida = formato_saida if formato_saida else ".xlsx"
-            output_filename = f"{name}_tabelas{ext_saida}"
-            output_path = os.path.join(temp_dir, output_filename)
-            with redirect_to_ws(loop):
-                await loop.run_in_executor(None, extrair_tabelas_pdf, input_path, output_path)
-            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+            if len(input_paths) > 1:
+                lote_id = f"tabelas_{int(time.time() * 1000)}"
+                lote_dir = os.path.join(temp_dir, lote_id)
+                os.makedirs(lote_dir, exist_ok=True)
+                ext_saida = formato_saida if formato_saida else ".xlsx"
+                for ipath in input_paths:
+                    nome_base = os.path.splitext(os.path.basename(ipath))[0]
+                    caminho_saida = os.path.join(lote_dir, f"{nome_base}_tabelas{ext_saida}")
+                    with redirect_to_ws(loop):
+                        await loop.run_in_executor(None, extrair_tabelas_pdf, ipath, caminho_saida)
+                
+                zip_base = os.path.join(temp_dir, f"{lote_id}_final")
+                shutil.make_archive(zip_base, 'zip', lote_dir)
+                output_path = f"{zip_base}.zip"
+                output_filename = "tabelas_extraidas.zip"
+                shutil.rmtree(lote_dir, ignore_errors=True)
+                background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
+            else:
+                input_path = input_paths[0]
+                name = os.path.splitext(os.path.basename(input_path))[0]
+                ext_saida = formato_saida if formato_saida else ".xlsx"
+                output_filename = f"{name}_tabelas{ext_saida}"
+                output_path = os.path.join(temp_dir, output_filename)
+                with redirect_to_ws(loop):
+                    await loop.run_in_executor(None, extrair_tabelas_pdf, input_path, output_path)
+                background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
 
         elif acao == "Sanitizar Arquivo":
             input_path = input_paths[0]
@@ -337,14 +355,32 @@ async def convert_file_stream(
             background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
 
         elif acao == "Reconhecimento OCR":
-            input_path = input_paths[0]
-            name = os.path.splitext(os.path.basename(input_path))[0]
-            ext_saida = formato_saida if formato_saida else ".txt"
-            output_filename = f"{name}_ocr{ext_saida}"
-            output_path = os.path.join(temp_dir, output_filename)
-            with redirect_to_ws(loop):
-                await loop.run_in_executor(None, ocr_documento, input_path, output_path)
-            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
+            if len(input_paths) > 1:
+                lote_id = f"ocr_{int(time.time() * 1000)}"
+                lote_dir = os.path.join(temp_dir, lote_id)
+                os.makedirs(lote_dir, exist_ok=True)
+                ext_saida = formato_saida if formato_saida else ".txt"
+                for ipath in input_paths:
+                    nome_base = os.path.splitext(os.path.basename(ipath))[0]
+                    caminho_saida = os.path.join(lote_dir, f"{nome_base}_ocr{ext_saida}")
+                    with redirect_to_ws(loop):
+                        await loop.run_in_executor(None, ocr_documento, ipath, caminho_saida)
+                
+                zip_base = os.path.join(temp_dir, f"{lote_id}_final")
+                shutil.make_archive(zip_base, 'zip', lote_dir)
+                output_path = f"{zip_base}.zip"
+                output_filename = "ocr_lote.zip"
+                shutil.rmtree(lote_dir, ignore_errors=True)
+                background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
+            else:
+                input_path = input_paths[0]
+                name = os.path.splitext(os.path.basename(input_path))[0]
+                ext_saida = formato_saida if formato_saida else ".txt"
+                output_filename = f"{name}_ocr{ext_saida}"
+                output_path = os.path.join(temp_dir, output_filename)
+                with redirect_to_ws(loop):
+                    await loop.run_in_executor(None, ocr_documento, input_path, output_path)
+                background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
             
         elif acao == "Converter em Lote (ZIP)":
             lote_id = f"lote_{int(time.time() * 1000)}"
@@ -449,11 +485,25 @@ async def convert_file_stream(
             background_tasks.add_task(remover_arquivos_temporarios, *caminhos_a_remover)
 
         elif acao == "Renomear em Lote (ZIP)":
-            output_filename = "lote_renomeado.zip"
-            output_path = os.path.join(temp_dir, output_filename)
-            with redirect_to_ws(loop):
-                await loop.run_in_executor(None, renomear_em_lote, input_paths, output_path, padrao_nome)
-            background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
+            if len(input_paths) == 1:
+                ipath = input_paths[0]
+                nome_original = os.path.basename(ipath)
+                nome_sem_ext, ext = os.path.splitext(nome_original)
+                novo_nome = padrao_nome.replace('{nome_original}', nome_original)
+                novo_nome = novo_nome.replace('{nome}', nome_sem_ext)
+                novo_nome = novo_nome.replace('{i}', "1")
+                if ext and not novo_nome.lower().endswith(ext.lower()):
+                    novo_nome += ext
+                output_filename = novo_nome
+                output_path = os.path.join(temp_dir, output_filename)
+                shutil.copy(ipath, output_path)
+                background_tasks.add_task(remover_arquivos_temporarios, ipath, output_path)
+            else:
+                output_filename = "lote_renomeado.zip"
+                output_path = os.path.join(temp_dir, output_filename)
+                with redirect_to_ws(loop):
+                    await loop.run_in_executor(None, renomear_em_lote, input_paths, output_path, padrao_nome)
+                background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
 
         elif acao == "Fatiar PDF por Tamanho":
             input_path = input_paths[0]

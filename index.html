@@ -398,6 +398,16 @@
                                             label="Padrão (ex: {i} - {nome} [sufixo])" value="{i} - {nome} []"
                                             class="hidden"></md-outlined-text-field>
 
+                                        <!-- Opção de agrupar resultados de lote -->
+                                        <div id="batch-group-container" class="hidden"
+                                            style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); border-radius: 12px; margin-bottom: 8px; width: 100%; box-sizing: border-box; backdrop-filter: blur(10px);">
+                                            <div style="display:flex; flex-direction:column; text-align:left; gap: 2px;">
+                                                <span id="batch-group-title" style="font-size:13px; font-weight:500; color:var(--md-sys-color-on-surface);">Agrupar em arquivo único</span>
+                                                <span id="batch-group-desc" style="font-size:11px; color:var(--md-sys-color-on-surface-variant); line-height: 1.3;">Unir todos os resultados em um único arquivo de saída</span>
+                                            </div>
+                                            <md-switch id="input-batch-group" selected></md-switch>
+                                        </div>
+
                                         <!-- Fila de arquivos selecionados -->
                                         <div id="file-queue"></div>
                                     </div>
