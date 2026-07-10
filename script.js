@@ -239,6 +239,7 @@ const batchToggles = {
     "Converter Formato": { show: true, default: false, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos convertidos em um único ZIP" },
     "Converter em Lote (ZIP)": { show: true, default: true, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos convertidos em um único ZIP" },
     "Imagens para PDF": { show: true, default: true, title: "Juntar em um único PDF", desc: "Unir todas as imagens em um PDF ou criar um PDF por imagem" },
+    "Juntar DOCX": { show: true, default: true, title: "Juntar em um único Word (DOCX)", desc: "Combinar todos os documentos Word em um único arquivo DOCX ou baixar separados" },
     "Extrair Tabelas (PDF)": { show: true, default: false, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todas as planilhas extraídas em um único ZIP" },
     "Reconhecimento OCR": { show: true, default: false, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos de texto do OCR em um único ZIP" },
     "Renomear em Lote (ZIP)": { show: true, default: true, title: "Agrupar em arquivo único (ZIP)", desc: "Compactar todos os arquivos renomeados em um único ZIP" }
@@ -567,14 +568,18 @@ async function startBatchConversion() {
                 action = "Converter Formato";
                 forceIndividualLoop = true;
             }
-        } else if (action === "Renomear em Lote (ZIP)" || action === "Extrair Tabelas (PDF)" || action === "Reconhecimento OCR") {
+        } else if (action === "Renomear em Lote (ZIP)" || action === "Extrair Tabelas (PDF)" || action === "Reconhecimento OCR" || action === "Juntar DOCX") {
             forceIndividualLoop = true;
+            if (action === "Juntar DOCX") {
+                action = "Converter Formato";
+                selectedFormatOverride = ".docx";
+            }
         }
     }
 
     // Ferramentas que processam lote direto no backend (quando agrupado)
     const isBatchAction = !forceIndividualLoop && [
-        "Converter em Lote (ZIP)", "Juntar PDFs", "Renomear em Lote (ZIP)", "Imagens para PDF", "Extrair Tabelas (PDF)", "Reconhecimento OCR"
+        "Converter em Lote (ZIP)", "Juntar PDFs", "Juntar DOCX", "Renomear em Lote (ZIP)", "Imagens para PDF", "Extrair Tabelas (PDF)", "Reconhecimento OCR"
     ].includes(action);
 
     if (isBatchAction) {
@@ -585,6 +590,8 @@ async function startBatchConversion() {
             progressText = `Renomeando e compactando ${selectedFiles.length} arquivos em lote...`;
         } else if (action === "Imagens para PDF") {
             progressText = `Combinando ${selectedFiles.length} imagens em um único PDF...`;
+        } else if (action === "Juntar DOCX") {
+            progressText = `Combinando ${selectedFiles.length} documentos em um único DOCX...`;
         } else if (action === "Extrair Tabelas (PDF)") {
             progressText = `Extraindo tabelas de ${selectedFiles.length} PDFs em lote...`;
         } else if (action === "Reconhecimento OCR") {
@@ -618,6 +625,8 @@ async function startBatchConversion() {
                 let downloadName = "pdfs_juntos.pdf";
                 if (action === "Imagens para PDF") {
                     downloadName = "imagens_juntas.pdf";
+                } else if (action === "Juntar DOCX") {
+                    downloadName = "documentos_juntos.docx";
                 } else if (action === "Converter em Lote (ZIP)") {
                     downloadName = (originalAction === "Imagens para PDF") ? "imagens_individuais.zip" : "lote_convertido.zip";
                 } else if (action === "Renomear em Lote (ZIP)") {
@@ -659,6 +668,7 @@ async function startBatchConversion() {
                 if (action === "Converter em Lote (ZIP)") errLabel = "Erro ao processar lote";
                 else if (action === "Renomear em Lote (ZIP)") errLabel = "Erro ao renomear arquivos";
                 else if (action === "Imagens para PDF") errLabel = "Erro ao combinar imagens";
+                else if (action === "Juntar DOCX") errLabel = "Erro ao combinar documentos";
                 else if (action === "Extrair Tabelas (PDF)") errLabel = "Erro ao extrair tabelas";
                 else if (action === "Reconhecimento OCR") errLabel = "Erro no OCR";
                 showAlert(`${errLabel}: ${errResult.message || response.statusText}`, 'error');

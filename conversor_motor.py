@@ -1210,6 +1210,33 @@ def fatiar_pdf_por_tamanho(origem: str, destino_zip: str, limite_mb: float) -> N
         for nome_parte, pdf_bytes in pdf_parts:
             zipf.writestr(nome_parte, pdf_bytes)
 
+def juntar_docx(lista_caminhos: list, caminho_saida: str) -> None:
+    try:
+        from docx import Document
+    except ImportError:
+        raise ConversionError("A biblioteca 'python-docx' não está disponível.")
+        
+    try:
+        if not lista_caminhos:
+            raise ConversionError("Nenhum arquivo Word enviado para juntar.")
+            
+        doc_merged = Document(lista_caminhos[0])
+        
+        for i in range(1, len(lista_caminhos)):
+            doc_merged.add_page_break()
+            sub_doc = Document(lista_caminhos[i])
+            for element in sub_doc.element.body:
+                # Pula os elementos de propriedades de seção para manter o XML válido
+                if element.tag.endswith('sectPr'):
+                    continue
+                doc_merged.element.body.append(element)
+                
+        doc_merged.save(caminho_saida)
+        print(f"[INFO] Documentos Word combinados com sucesso em: {caminho_saida}")
+    except Exception as e:
+        print(f"[ERROR] Falha ao juntar arquivos DOCX: {str(e)}")
+        raise ConversionError(f"Falha ao juntar arquivos Word: {str(e)}")
+
 def renomear_em_lote(caminhos_origem: list, destino_zip: str, padrao: str) -> None:
     import os
     import zipfile

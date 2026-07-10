@@ -27,7 +27,7 @@ from conversor_motor import (
     extrair_tabelas_pdf, sanitizar_arquivo, comprimir_arquivo, ocr_documento,
     rotacionar_pdf, numerar_paginas_pdf, remover_paginas_pdf, aplicar_marca_dagua,
     censurar_pdf, extrair_paginas_pdf, reparar_pdf, assinar_pdf,
-    fatiar_pdf_por_tamanho, renomear_em_lote
+    fatiar_pdf_por_tamanho, renomear_em_lote, juntar_docx
 )
 
 # --- CONFIGURAÇÃO FFMPEG PARA O PYINSTALLER ---
@@ -251,6 +251,13 @@ async def convert_file_stream(
             output_path = os.path.join(temp_dir, output_filename)
             with redirect_to_ws(loop):
                 await loop.run_in_executor(None, juntar_pdfs, input_paths, output_path)
+            background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
+            
+        elif acao == "Juntar DOCX":
+            output_filename = "documentos_juntos.docx"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, juntar_docx, input_paths, output_path)
             background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
             
         elif acao == "Dividir PDF":
