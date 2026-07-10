@@ -1131,6 +1131,67 @@ def assinar_pdf(origem: str, destino: str, certificado_pfx: str, senha_pfx: str)
     except Exception as e:
         raise ConversionError(f"Erro ao assinar PDF: {str(e)}")
 
+def fatiar_pdf_por_tamanho(origem: str, destino_zip: str, limite_mb: float) -> None:
+    import fitz
+    import zipfile
+    
+    limite_bytes = limite_mb * 1024 * 1024
+    origem_doc = fitz.open(origem)
+    pdf_parts = []
+    
+    chunk = fitz.open()
+    nome_base = os.path.splitext(os.path.basename(origem))[0]
+    
+    for i in range(len(origem_doc)):
+        chunk.insert_pdf(origem_doc, from_page=i, to_page=i)
+        
+        if len(chunk.write()) > limite_bytes:
+            if len(chunk) > 1:
+                chunk.delete_page(-1)
+                part_index = len(pdf_parts) + 1
+                pdf_parts.append((f"{nome_base}_parte_{part_index}.pdf", chunk.write()))
+                
+                chunk.close()
+                chunk = fitz.open()
+                chunk.insert_pdf(origem_doc, from_page=i, to_page=i)
+            else:
+                part_index = len(pdf_parts) + 1
+                pdf_parts.append((f"{nome_base}_parte_{part_index}.pdf", chunk.write()))
+                chunk.close()
+                chunk = fitz.open()
+                
+    if len(chunk) > 0:
+        part_index = len(pdf_parts) + 1
+        pdf_parts.append((f"{nome_base}_parte_{part_index}.pdf", chunk.write()))
+        
+    chunk.close()
+    origem_doc.close()
+    
+    with zipfile.ZipFile(destino_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for nome_parte, pdf_bytes in pdf_parts:
+            zipf.writestr(nome_parte, pdf_bytes)
+
+def renomear_em_lote(caminhos_origem: list, destino_zip: str, padrao: str) -> None:
+    import os
+    import zipfile
+    
+    with zipfile.ZipFile(destino_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for i, caminho in enumerate(caminhos_origem):
+            if not os.path.exists(caminho):
+                continue
+                
+            nome_original = os.path.basename(caminho)
+            nome_sem_ext, ext = os.path.splitext(nome_original)
+            
+            novo_nome = padrao.replace('{nome_original}', nome_original)
+            novo_nome = novo_nome.replace('{nome}', nome_sem_ext)
+            novo_nome = novo_nome.replace('{i}', str(i + 1))
+            
+            if ext and not novo_nome.lower().endswith(ext.lower()):
+                novo_nome += ext
+                
+            zipf.write(caminho, arcname=novo_nome)
+
 # 9. Interface de Linha de Comando (CLI) para Testes
 if __name__ == "__main__":
     import argparse

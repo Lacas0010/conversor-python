@@ -260,6 +260,8 @@ document.querySelectorAll('.tool-item').forEach(btn => {
         document.getElementById('input-watermark').classList.toggle('hidden', window.currentAction !== "Adicionar Marca d'Água");
         document.getElementById('input-pages').classList.toggle('hidden', window.currentAction !== "Remover Páginas");
         document.getElementById('select-angle').classList.toggle('hidden', window.currentAction !== "Rotacionar PDF");
+        document.getElementById('input-mb').classList.toggle('hidden', window.currentAction !== "Fatiar PDF por Tamanho");
+        document.getElementById('input-rename').classList.toggle('hidden', window.currentAction !== "Renomear em Lote (ZIP)");
         
         updateControlsState();
     });
@@ -507,14 +509,20 @@ async function startBatchConversion() {
     const censorText = document.getElementById('input-censor').value || '';
     const extractPages = document.getElementById('input-extract').value || '';
     const pfxFile = document.getElementById('input-pfx').files[0];
+    const sizeMB = document.getElementById('input-mb').value || '20';
+    const renamePattern = document.getElementById('input-rename').value || '{i} - {nome} []';
     
     let successCount = 0;
     let errorsCount = 0;
 
-    if (action === "Juntar PDFs" || action === "Imagens para PDF" || action === "Converter em Lote (ZIP)") {
+    const isBatchAction = ["Converter em Lote (ZIP)", "Juntar PDFs", "Renomear em Lote (ZIP)"].includes(action);
+
+    if (isBatchAction) {
         let progressText = `Juntando ${selectedFiles.length} arquivos...`;
         if (action === "Converter em Lote (ZIP)") {
             progressText = `Convertendo e compactando ${selectedFiles.length} arquivos em lote...`;
+        } else if (action === "Renomear em Lote (ZIP)") {
+            progressText = `Renomeando ${selectedFiles.length} arquivos em lote...`;
         }
         document.getElementById('progress-label').textContent = progressText;
 
@@ -526,6 +534,8 @@ async function startBatchConversion() {
         formData.append('marca_dagua', watermarkText);
         formData.append('paginas_remover', pagesToRemove);
         formData.append('angulo', rotationAngle);
+        formData.append('tamanho_mb', sizeMB);
+        formData.append('padrao_nome', renamePattern);
 
         for (let file of selectedFiles) {
             formData.append('files', file);
@@ -544,6 +554,8 @@ async function startBatchConversion() {
                     downloadName = "imagens_juntas.pdf";
                 } else if (action === "Converter em Lote (ZIP)") {
                     downloadName = "lote_convertido.zip";
+                } else if (action === "Renomear em Lote (ZIP)") {
+                    downloadName = "lote_renomeado.zip";
                 }
                 
                 a.download = downloadName;
@@ -573,7 +585,7 @@ async function startBatchConversion() {
                 ` + historyList.innerHTML;
             } else {
                 const errResult = await response.json().catch(() => ({}));
-                let errLabel = action === "Converter em Lote (ZIP)" ? "Erro ao processar lote" : "Erro ao juntar PDFs";
+                let errLabel = action === "Converter em Lote (ZIP)" ? "Erro ao processar lote" : (action === "Renomear em Lote (ZIP)" ? "Erro ao renomear arquivos" : "Erro ao juntar PDFs");
                 showAlert(`${errLabel}: ${errResult.message || response.statusText}`, 'error');
                 errorsCount++;
             }
@@ -598,6 +610,8 @@ async function startBatchConversion() {
             formData.append('texto_censura', censorText || '');
             formData.append('paginas_extrair', extractPages || '');
             if (pfxFile) formData.append('certificado_pfx', pfxFile);
+            formData.append('tamanho_mb', sizeMB);
+            formData.append('padrao_nome', renamePattern);
 
             try {
                 const response = await fetch('/api/converter', { method: 'POST', body: formData });

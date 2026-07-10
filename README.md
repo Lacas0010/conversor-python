@@ -9,19 +9,21 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 
 ## 🛠️ Ferramentas Disponíveis
 
-O conversor possui 20 ferramentas organizadas em 4 categorias no painel lateral:
+O conversor possui 22 ferramentas organizadas em 4 categorias no painel lateral:
 
 ### 1. Conversão & Extração
 * **Converter Formato**: Conversão universal individual para mais de 50 formatos (tabelas, documentos, imagens de alta resolução/RAW, áudios, vídeos com exportação de GIFs, dados espaciais e bancos de dados sqlite).
 * **Converter Lote (ZIP)**: Processamento paralelo de múltiplos arquivos, retornando um pacote `.zip` consolidado.
 * **Extrair Tabelas (PDF)**: Varre o documento PDF procurando tabelas nativas e as exporta para planilhas `.xlsx` ou `.csv` estruturadas.
 * **OCR (Texto)**: Escaneamento óptico de PDFs digitalizados ou imagens para extração de texto estruturado para arquivos `.docx` ou `.txt`.
+* **Renomear em Lote**: Renomeação paralela de múltiplos arquivos com base em padrões customizáveis contendo tags dinâmicas como `{nome}`, `{nome_original}` e `{i}`.
 
 ### 2. Organização de PDF
 * **Juntar PDFs**: Unificação de múltiplos arquivos PDF em um único documento, mantendo a ordem de envio.
 * **Dividir PDF**: Separação de todas as páginas de um PDF em arquivos individuais exportados em um `.zip`.
 * **Imagens p/ PDF**: Construção de um arquivo PDF multipágina a partir de uma fila de imagens (PNG, JPG, etc.).
 * **PDF p/ Imagens**: Extração de todas as páginas de um PDF como imagens em alta resolução compactadas em um `.zip`.
+* **Fatiar por MB (SEI)**: Fatiamento de um arquivo PDF individual em múltiplos PDFs menores de acordo com o limite de tamanho em Megabytes escolhido.
 
 ### 3. Edição Avançada (PDF)
 * **Rotacionar PDF**: Ajuste e rotação de páginas em lote nos ângulos de 90°, 180° ou 270°.

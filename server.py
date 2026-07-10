@@ -26,7 +26,8 @@ from conversor_motor import (
     pdf_para_imagens, imagens_para_pdf,
     extrair_tabelas_pdf, sanitizar_arquivo, comprimir_arquivo, ocr_documento,
     rotacionar_pdf, numerar_paginas_pdf, remover_paginas_pdf, aplicar_marca_dagua,
-    censurar_pdf, extrair_paginas_pdf, reparar_pdf, assinar_pdf
+    censurar_pdf, extrair_paginas_pdf, reparar_pdf, assinar_pdf,
+    fatiar_pdf_por_tamanho, renomear_em_lote
 )
 
 # --- CONFIGURAÇÃO FFMPEG PARA O PYINSTALLER ---
@@ -221,7 +222,9 @@ async def convert_file_stream(
     paginas_remover: str = Form(""),
     certificado_pfx: UploadFile = File(None),
     texto_censura: str = Form(""),
-    paginas_extrair: str = Form("")
+    paginas_extrair: str = Form(""),
+    tamanho_mb: float = Form(20.0),
+    padrao_nome: str = Form("{i} - {nome} []")
 ):
     temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_uploads")
     os.makedirs(temp_dir, exist_ok=True)
@@ -444,6 +447,22 @@ async def convert_file_stream(
             if pfx_path:
                 caminhos_a_remover.append(pfx_path)
             background_tasks.add_task(remover_arquivos_temporarios, *caminhos_a_remover)
+
+        elif acao == "Renomear em Lote (ZIP)":
+            output_filename = "lote_renomeado.zip"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, renomear_em_lote, input_paths, output_path, padrao_nome)
+            background_tasks.add_task(remover_arquivos_temporarios, *input_paths, output_path)
+
+        elif acao == "Fatiar PDF por Tamanho":
+            input_path = input_paths[0]
+            name = os.path.splitext(os.path.basename(input_path))[0]
+            output_filename = f"{name}_fatiado_por_tamanho.zip"
+            output_path = os.path.join(temp_dir, output_filename)
+            with redirect_to_ws(loop):
+                await loop.run_in_executor(None, fatiar_pdf_por_tamanho, input_path, output_path, tamanho_mb)
+            background_tasks.add_task(remover_arquivos_temporarios, input_path, output_path)
 
         else:
             input_path = input_paths[0]

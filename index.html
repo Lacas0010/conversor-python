@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,15 +8,17 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- M3 Fonts and Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
-    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+        rel="stylesheet" />
+
     <!-- Material Web Components module -->
     <script type="module" src="https://esm.run/@material/web/all.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    
+
     <link rel="stylesheet" href="/static/style.css">
 
 </head>
+
 <body>
     <!-- Ambient Orbs -->
     <div class="ambient-orb orb-1"></div>
@@ -35,299 +38,461 @@
                 <button class="nav-tab" data-target="view-help">Ajuda</button>
             </div>
             <div class="top-bar-right">
-                <span title="100% Offline" class="material-symbols-outlined" style="color: #34d399; text-shadow: 0 0 16px rgba(52, 211, 153, 0.5);">offline_bolt</span>
-                <button class="icon-btn" id="theme-toggle" title="Alternar Tema" style="background:transparent; border:none; color:var(--md-sys-color-on-surface); cursor:pointer;">
+                <span title="100% Offline" class="material-symbols-outlined"
+                    style="color: #34d399; text-shadow: 0 0 16px rgba(52, 211, 153, 0.5);">offline_bolt</span>
+                <button class="icon-btn" id="theme-toggle" title="Alternar Tema"
+                    style="background:transparent; border:none; color:var(--md-sys-color-on-surface); cursor:pointer;">
                     <span id="theme-icon" class="material-symbols-outlined">light_mode</span>
                 </button>
             </div>
         </header>
 
-    <!-- Main Content Panel -->
-    <div class="main-content">
-        <div class="container">
-            
-            <!-- 0. VIEW COMO USAR (HELP) -->
-            <section id="view-help" class="view active">
-                <div class="dashboard-card">
-                    <header>
-                        <h1><span class="icon">help</span> Como Usar o Conversor</h1>
-                        <p>Bem-vindo! Siga este guia rápido para utilizar todas as ferramentas avançadas.</p>
-                    </header>
-                    <div style="color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; flex: 1; overflow-y: auto; padding-right: 12px; min-height: 0;">
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">1. Converter Formatos</h3>
-                        <p>Selecione <strong>"Converter Formato"</strong>, arraste seus arquivos, escolha o formato de saída (suportando PDF, DOCX, TXT, planilhas CSV, XLSX, XLS, dados Parquet, apresentações PPT/PPTX e exportação de GIFs animados a partir de vídeos) e clique em Iniciar. Ideal para conversões universais individuais.</p>
-                        
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">2. Juntar PDFs</h3>
-                        <p>Selecione <strong>"Juntar PDFs"</strong> e arraste <strong>múltiplos PDFs</strong>. O sistema unirá todos em um único documento, mantendo a ordem da fila de arquivos.</p>
-                        
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">3. Dividir PDF</h3>
-                        <p>Arraste um PDF e selecione <strong>"Dividir PDF"</strong>. Cada página virará um arquivo próprio, e você receberá um arquivo `.zip` contendo as páginas fatiadas.</p>
-                        
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">4. Imagens para PDF e PDF para Imagens</h3>
-                        <p>Arraste várias imagens (PNG, JPG) e selecione <strong>"Imagens para PDF"</strong> para construir um portfólio. Ou arraste um PDF e use <strong>"PDF para Imagens"</strong> para receber páginas em alta resolução comprimidas num ZIP.</p>
-                        
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">5. Segurança de PDFs</h3>
-                        <p>Com as opções <strong>"Proteger PDF"</strong> e <strong>"Desbloquear PDF"</strong>, o campo de senha aparecerá. Você pode blindar um documento usando criptografia AES-256 localmente, ou remover travas existentes se possuir a senha original.</p>
+        <!-- Main Content Panel -->
+        <div class="main-content">
+            <div class="container">
 
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">6. Extrair Tabelas (PDF)</h3>
-                        <p>Selecione <strong>"Extrair Tabelas (PDF)"</strong> para ler dados tabulares de dentro do PDF e convertê-los automaticamente para uma planilha <code>.xlsx</code> ou <code>.csv</code> consolidada.</p>
-                        
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">7. Sanitizar Arquivo</h3>
-                        <p>Use <strong>"Sanitizar Arquivo"</strong> em PDFs ou Imagens para limpar todos os metadados (incluindo EXIF, autor, software usado), garantindo total privacidade antes do compartilhamento.</p>
-
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">8. Comprimir Arquivo</h3>
-                        <p>Use <strong>"Comprimir Arquivo"</strong> para reduzir o peso de PDFs (removendo lixo interno) ou para recomprimir vídeos pesados usando aceleração FFmpeg, gerando arquivos mais leves sem perder qualidade.</p>
-                        
-                         <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">9. Reconhecimento OCR</h3>
-                        <p>Selecione <strong>"Reconhecimento OCR"</strong> para escanear visualmente PDFs fatiados ou imagens, extraindo o texto e transformando-o num documento editável estruturado (como <code>.docx</code> ou <code>.txt</code>).</p>
-
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">10. Edição Avançada de PDFs</h3>
-                        <p>No painel lateral, você encontra ferramentas específicas para manipulação rápida de documentos PDF:</p>
-                        <ul style="padding-left: 20px; margin-top: 8px;">
-                            <li style="margin-bottom: 8px;"><strong>Rotacionar PDF:</strong> Corrige a orientação de todas as páginas do documento (suporta 90°, 180° e 270°).</li>
-                            <li style="margin-bottom: 8px;"><strong>Remover Páginas:</strong> Exclui páginas específicas do PDF. Digite os números das páginas ou intervalos separados por vírgula (ex: <code>1, 3-5, 8</code>).</li>
-                            <li style="margin-bottom: 8px;"><strong>Numerar Páginas:</strong> Insere automaticamente o número da página (no formato "Página X de Y") no rodapé de cada folha.</li>
-                            <li style="margin-bottom: 8px;"><strong>Marca d'Água:</strong> Adiciona um texto semitransparente personalizado centralizado em diagonal sobre todas as páginas do PDF.</li>
-                            <li style="margin-bottom: 8px;"><strong>Extrair Páginas:</strong> Cria um novo PDF contendo apenas as páginas indicadas (ex: <code>1, 3, 5-8</code>).</li>
-                            <li style="margin-bottom: 8px;"><strong>Reparar PDF:</strong> Reconstrói e recupera a árvore de páginas e a tabela de referências cruzadas de arquivos PDF danificados ou corrompidos.</li>
-                        </ul>
-
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">11. Censura e Assinatura Digital</h3>
-                        <ul style="padding-left: 20px; margin-top: 8px;">
-                            <li style="margin-bottom: 8px;"><strong>Censurar PDF (Tarja Preta):</strong> Localiza nomes, números, CPFs ou palavras-chave no texto do PDF e insere uma tarja preta de censura definitiva (ideal para conformidade com a LGPD).</li>
-                            <li style="margin-bottom: 8px;"><strong>Assinar PDF (A1):</strong> Aplica uma assinatura digital no PDF usando o seu Certificado Digital A1 corporativo (arquivos <code>.pfx</code> ou <code>.p12</code>).</li>
-                        </ul>
-
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">12. Converter em Lote (ZIP)</h3>
-                        <p>Selecione <strong>"Converter Lote (ZIP)"</strong> para enviar múltiplos arquivos de uma vez. O motor converterá todos de forma paralela e os agrupará em um arquivo compactado <code>.zip</code> para download rápido.</p>
-
-                        <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">13. Visualização (Preview) de Arquivos</h3>
-                        <p>Ao arrastar ou selecionar arquivos para a aplicação, a área central se transforma em um <strong>Visualizador Dinâmico Inteligente</strong>. Formatos comuns como imagens, vídeos, áudios e PDFs são exibidos instantaneamente utilizando a memória RAM local. Formatos corporativos do Office (Word <code>.docx</code>, planilhas Excel <code>.xlsx</code>/<code>.xls</code> e arquivos delimitados <code>.csv</code>) contam com renderização dinâmica gerada sob demanda localmente pelo backend offline.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 1. VIEW CONVERSOR (TELA PRINCIPAL) -->
-            <section id="view-conversor" class="view">
-                <div class="dashboard-layout">
+                <!-- 0. VIEW COMO USAR (HELP) -->
+                <section id="view-help" class="view active">
                     <div class="dashboard-card">
+                        <header>
+                            <h1><span class="icon">help</span> Como Usar o Conversor</h1>
+                            <p>Bem-vindo! Siga este guia rápido para utilizar todas as ferramentas avançadas.</p>
+                        </header>
+                        <div
+                            style="color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; flex: 1; overflow-y: auto; padding-right: 12px; min-height: 0;">
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">1. Converter Formatos</h3>
+                            <p>Selecione <strong>"Converter Formato"</strong>, arraste seus arquivos, escolha o formato
+                                de saída (suportando PDF, DOCX, TXT, planilhas CSV, XLSX, XLS, dados Parquet,
+                                apresentações PPT/PPTX e exportação de GIFs animados a partir de vídeos) e clique em
+                                Iniciar. Ideal para conversões universais individuais.</p>
 
-                    <!-- Input oculto para arquivos multiplos -->
-                    <input type="file" id="file-input" multiple>
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">2. Juntar PDFs</h3>
+                            <p>Selecione <strong>"Juntar PDFs"</strong> e arraste <strong>múltiplos PDFs</strong>. O
+                                sistema unirá todos em um único documento, mantendo a ordem da fila de arquivos.</p>
 
-                    <div class="app-split-layout">
-                        <aside class="tools-sidebar" id="tools-sidebar">
-                            <div class="sidebar-header">
-                                <button class="icon-btn" id="toggle-sidebar" title="Recolher Menu">
-                                    <span class="material-symbols-outlined">menu_open</span>
-                                </button>
-                                <span class="sidebar-title">Ferramentas</span>
-                            </div>
-                            
-                            <div class="sidebar-content">
-                                <div class="tool-category">
-                                    <div class="cat-title">Conversão & Extração</div>
-                                    <button class="tool-item active" data-action="Converter Formato"><span class="material-symbols-outlined">swap_horiz</span><span class="tool-name">Converter Formato</span></button>
-                                    <button class="tool-item" data-action="Converter em Lote (ZIP)"><span class="material-symbols-outlined">library_add</span><span class="tool-name">Converter Lote (ZIP)</span></button>
-                                    <button class="tool-item" data-action="Extrair Tabelas (PDF)"><span class="material-symbols-outlined">table_view</span><span class="tool-name">Extrair Tabelas</span></button>
-                                    <button class="tool-item" data-action="Reconhecimento OCR"><span class="material-symbols-outlined">document_scanner</span><span class="tool-name">OCR (Texto)</span></button>
-                                </div>
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">3. Dividir PDF</h3>
+                            <p>Arraste um PDF e selecione <strong>"Dividir PDF"</strong>. Cada página virará um arquivo
+                                próprio, e você receberá um arquivo `.zip` contendo as páginas fatiadas.</p>
 
-                                <div class="tool-category">
-                                    <div class="cat-title">Organização de PDF</div>
-                                    <button class="tool-item" data-action="Juntar PDFs"><span class="material-symbols-outlined">merge</span><span class="tool-name">Juntar PDFs</span></button>
-                                    <button class="tool-item" data-action="Dividir PDF"><span class="material-symbols-outlined">call_split</span><span class="tool-name">Dividir PDF</span></button>
-                                    <button class="tool-item" data-action="Imagens para PDF"><span class="material-symbols-outlined">collections_bookmark</span><span class="tool-name">Imagens p/ PDF</span></button>
-                                    <button class="tool-item" data-action="PDF para Imagens"><span class="material-symbols-outlined">imagesmode</span><span class="tool-name">PDF p/ Imagens</span></button>
-                                </div>
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">4. Imagens para PDF e PDF
+                                para Imagens</h3>
+                            <p>Arraste várias imagens (PNG, JPG) e selecione <strong>"Imagens para PDF"</strong> para
+                                construir um portfólio. Ou arraste um PDF e use <strong>"PDF para Imagens"</strong> para
+                                receber páginas em alta resolução comprimidas num ZIP.</p>
 
-                                <div class="tool-category">
-                                    <div class="cat-title">Edição Avançada</div>
-                                    <button class="tool-item" data-action="Rotacionar PDF"><span class="material-symbols-outlined">rotate_right</span><span class="tool-name">Rotacionar PDF</span></button>
-                                    <button class="tool-item" data-action="Remover Páginas"><span class="material-symbols-outlined">delete_sweep</span><span class="tool-name">Remover Páginas</span></button>
-                                    <button class="tool-item" data-action="Numerar Páginas"><span class="material-symbols-outlined">format_list_numbered</span><span class="tool-name">Numerar Páginas</span></button>
-                                    <button class="tool-item" data-action="Adicionar Marca d'Água"><span class="material-symbols-outlined">branding_watermark</span><span class="tool-name">Marca d'Água</span></button>
-                                    <button class="tool-item" data-action="Extrair Páginas"><span class="material-symbols-outlined">file_copy</span><span class="tool-name">Extrair Páginas</span></button>
-                                    <button class="tool-item" data-action="Reparar PDF"><span class="material-symbols-outlined">healing</span><span class="tool-name">Reparar PDF</span></button>
-                                </div>
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">5. Segurança de PDFs</h3>
+                            <p>Com as opções <strong>"Proteger PDF"</strong> e <strong>"Desbloquear PDF"</strong>, o
+                                campo de senha aparecerá. Você pode blindar um documento usando criptografia AES-256
+                                localmente, ou remover travas existentes se possuir a senha original.</p>
 
-                                <div class="tool-category">
-                                    <div class="cat-title">Segurança & Otimização</div>
-                                    <button class="tool-item" data-action="Proteger PDF"><span class="material-symbols-outlined">lock</span><span class="tool-name">Proteger PDF</span></button>
-                                    <button class="tool-item" data-action="Desbloquear PDF"><span class="material-symbols-outlined">lock_open</span><span class="tool-name">Desbloquear PDF</span></button>
-                                    <button class="tool-item" data-action="Sanitizar Arquivo"><span class="material-symbols-outlined">cleaning_services</span><span class="tool-name">Sanitizar Arquivo</span></button>
-                                    <button class="tool-item" data-action="Comprimir Arquivo"><span class="material-symbols-outlined">compress</span><span class="tool-name">Comprimir Arquivo</span></button>
-                                    <button class="tool-item" data-action="Censurar PDF (Tarja Preta)"><span class="material-symbols-outlined">visibility_off</span><span class="tool-name">Censurar (LGPD)</span></button>
-                                    <button class="tool-item" data-action="Assinar PDF"><span class="material-symbols-outlined">workspace_premium</span><span class="tool-name">Assinar PDF (A1)</span></button>
-                                </div>
-                            </div>
-                        </aside>
-                        <!-- Coluna 1: Workspace -->
-                        <div class="workspace-pane">
-                            <!-- Dropzone interativa M3 -->
-                            <div class="dropzone" id="dropzone">
-                                <span class="upload-icon">cloud_upload</span>
-                                <div class="primary-text">Arraste seus arquivos aqui ou clique para selecionar</div>
-                                <div class="secondary-text">Suporta múltiplos documentos, tabelas, imagens e mídias</div>
-                            </div>
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">6. Extrair Tabelas (PDF)
+                            </h3>
+                            <p>Selecione <strong>"Extrair Tabelas (PDF)"</strong> para ler dados tabulares de dentro do
+                                PDF e convertê-los automaticamente para uma planilha <code>.xlsx</code> ou
+                                <code>.csv</code> consolidada.
+                            </p>
 
-                            <div id="preview-section" class="hidden" style="flex: 1; display: flex; flex-direction: column; background: var(--md-sys-color-surface-variant); border: 1px solid var(--glass-border); border-radius: 24px; padding: 16px; min-height: 0; position: relative;">
-                                <div id="preview-drag-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(56, 189, 248, 0.08); border: 2px dashed var(--md-sys-color-primary); border-radius: 24px; display: none; align-items: center; justify-content: center; z-index: 99; pointer-events: none;">
-                                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-primary);">upload_file</span>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 16px; flex-shrink: 0;">
-                                    <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
-                                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); flex-shrink: 0;">visibility</span>
-                                        <span id="preview-filename" style="font-weight: 600; font-size: 15px; color: var(--md-sys-color-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;">nome_do_arquivo.ext</span>
-                                    </div>
-                                    
-                                    <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
-                                        <button id="btn-add-more" style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; border-radius: 8px; padding: 6px 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s;">
-                                            <span class="material-symbols-outlined" style="font-size: 18px;">add_circle</span> Mais Arquivos
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">7. Sanitizar Arquivo</h3>
+                            <p>Use <strong>"Sanitizar Arquivo"</strong> em PDFs ou Imagens para limpar todos os
+                                metadados (incluindo EXIF, autor, software usado), garantindo total privacidade antes do
+                                compartilhamento.</p>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">8. Comprimir Arquivo</h3>
+                            <p>Use <strong>"Comprimir Arquivo"</strong> para reduzir o peso de PDFs (removendo lixo
+                                interno) ou para recomprimir vídeos pesados usando aceleração FFmpeg, gerando arquivos
+                                mais leves sem perder qualidade.</p>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">9. Reconhecimento OCR</h3>
+                            <p>Selecione <strong>"Reconhecimento OCR"</strong> para escanear visualmente PDFs fatiados
+                                ou imagens, extraindo o texto e transformando-o num documento editável estruturado (como
+                                <code>.docx</code> ou <code>.txt</code>).
+                            </p>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">10. Edição Avançada de
+                                PDFs</h3>
+                            <p>No painel lateral, você encontra ferramentas específicas para manipulação rápida de
+                                documentos PDF:</p>
+                            <ul style="padding-left: 20px; margin-top: 8px;">
+                                <li style="margin-bottom: 8px;"><strong>Rotacionar PDF:</strong> Corrige a orientação de
+                                    todas as páginas do documento (suporta 90°, 180° e 270°).</li>
+                                <li style="margin-bottom: 8px;"><strong>Remover Páginas:</strong> Exclui páginas
+                                    específicas do PDF. Digite os números das páginas ou intervalos separados por
+                                    vírgula (ex: <code>1, 3-5, 8</code>).</li>
+                                <li style="margin-bottom: 8px;"><strong>Numerar Páginas:</strong> Insere automaticamente
+                                    o número da página (no formato "Página X de Y") no rodapé de cada folha.</li>
+                                <li style="margin-bottom: 8px;"><strong>Marca d'Água:</strong> Adiciona um texto
+                                    semitransparente personalizado centralizado em diagonal sobre todas as páginas do
+                                    PDF.</li>
+                                <li style="margin-bottom: 8px;"><strong>Extrair Páginas:</strong> Cria um novo PDF
+                                    contendo apenas as páginas indicadas (ex: <code>1, 3, 5-8</code>).</li>
+                                <li style="margin-bottom: 8px;"><strong>Reparar PDF:</strong> Reconstrói e recupera a
+                                    árvore de páginas e a tabela de referências cruzadas de arquivos PDF danificados ou
+                                    corrompidos.</li>
+                            </ul>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">11. Censura e Assinatura
+                                Digital</h3>
+                            <ul style="padding-left: 20px; margin-top: 8px;">
+                                <li style="margin-bottom: 8px;"><strong>Censurar PDF (Tarja Preta):</strong> Localiza
+                                    nomes, números, CPFs ou palavras-chave no texto do PDF e insere uma tarja preta de
+                                    censura definitiva (ideal para conformidade com a LGPD).</li>
+                                <li style="margin-bottom: 8px;"><strong>Assinar PDF (A1):</strong> Aplica uma assinatura
+                                    digital no PDF usando o seu Certificado Digital A1 corporativo (arquivos
+                                    <code>.pfx</code> ou <code>.p12</code>).
+                                </li>
+                            </ul>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">12. Converter em Lote
+                                (ZIP)</h3>
+                            <p>Selecione <strong>"Converter Lote (ZIP)"</strong> para enviar múltiplos arquivos de uma
+                                vez. O motor converterá todos de forma paralela e os agrupará em um arquivo compactado
+                                <code>.zip</code> para download rápido.
+                            </p>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">13. Visualização (Preview)
+                                de Arquivos</h3>
+                            <p>Ao arrastar ou selecionar arquivos para a aplicação, a área central se transforma em um
+                                <strong>Visualizador Dinâmico Inteligente</strong>. Formatos comuns como imagens,
+                                vídeos, áudios e PDFs são exibidos instantaneamente utilizando a memória RAM local.
+                                Formatos corporativos do Office (Word <code>.docx</code>, planilhas Excel
+                                <code>.xlsx</code>/<code>.xls</code> e arquivos delimitados <code>.csv</code>) contam
+                                com renderização dinâmica gerada sob demanda localmente pelo backend offline.
+                            </p>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">14. Fatiar por MB (SEI)
+                            </h3>
+                            <p>Esta ferramenta divide um arquivo PDF individual em partes menores baseadas no tamanho
+                                limite em Megabytes definido pelo usuário. Ideal para envio em sistemas com limitação
+                                estrita de tamanho por arquivo, como o SEI ou portais de peticionamento judicial.</p>
+
+                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">15. Renomear em Lote</h3>
+                            <p>Permite renomear múltiplos arquivos simultaneamente de forma automatizada com base em um
+                                padrão configurável. Suporta o uso de tags dinâmicas como <code>{nome}</code> (nome
+                                original sem extensão), <code>{nome_original}</code> (nome completo com extensão) e
+                                <code>{i}</code> (índice sequencial iniciando em 1), retornando um pacote compactado
+                                <code>.zip</code> com os arquivos renomeados.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 1. VIEW CONVERSOR (TELA PRINCIPAL) -->
+                <section id="view-conversor" class="view">
+                    <div class="dashboard-layout">
+                        <div class="dashboard-card">
+
+                            <!-- Input oculto para arquivos multiplos -->
+                            <input type="file" id="file-input" multiple>
+
+                            <div class="app-split-layout">
+                                <aside class="tools-sidebar" id="tools-sidebar">
+                                    <div class="sidebar-header">
+                                        <button class="icon-btn" id="toggle-sidebar" title="Recolher Menu">
+                                            <span class="material-symbols-outlined">menu_open</span>
                                         </button>
-                                        <span id="preview-counter" style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); font-weight: 500;">1 / 1</span>
+                                        <span class="sidebar-title">Ferramentas</span>
                                     </div>
-                                </div>
 
-                                <div style="flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 0;">
-                                    <button id="btn-prev-preview" class="nav-arrow" title="Arquivo Anterior">
-                                        <span class="material-symbols-outlined">chevron_left</span>
-                                    </button>
-
-                                    <div id="preview-content-container" style="flex: 1; display: flex; justify-content: center; align-items: center; height: 100%; overflow: hidden; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                                    <div class="sidebar-content">
+                                        <div class="tool-category">
+                                            <div class="cat-title">Conversão & Extração</div>
+                                            <button class="tool-item active" data-action="Converter Formato"><span
+                                                    class="material-symbols-outlined">swap_horiz</span><span
+                                                    class="tool-name">Converter Formato</span></button>
+                                            <button class="tool-item" data-action="Converter em Lote (ZIP)"><span
+                                                    class="material-symbols-outlined">library_add</span><span
+                                                    class="tool-name">Converter Lote (ZIP)</span></button>
+                                            <button class="tool-item" data-action="Extrair Tabelas (PDF)"><span
+                                                    class="material-symbols-outlined">table_view</span><span
+                                                    class="tool-name">Extrair Tabelas</span></button>
+                                            <button class="tool-item" data-action="Reconhecimento OCR"><span
+                                                    class="material-symbols-outlined">document_scanner</span><span
+                                                    class="tool-name">OCR (Texto)</span></button>
+                                            <button class="tool-item" data-action="Renomear em Lote (ZIP)"><span
+                                                    class="material-symbols-outlined">drive_file_rename_outline</span><span
+                                                    class="tool-name">Renomear em Lote</span></button>
                                         </div>
 
-                                    <button id="btn-next-preview" class="nav-arrow" title="Próximo Arquivo">
-                                        <span class="material-symbols-outlined">chevron_right</span>
-                                    </button>
+                                        <div class="tool-category">
+                                            <div class="cat-title">Organização de PDF</div>
+                                            <button class="tool-item" data-action="Juntar PDFs"><span
+                                                    class="material-symbols-outlined">merge</span><span
+                                                    class="tool-name">Juntar PDFs</span></button>
+                                            <button class="tool-item" data-action="Dividir PDF"><span
+                                                    class="material-symbols-outlined">call_split</span><span
+                                                    class="tool-name">Dividir PDF</span></button>
+                                            <button class="tool-item" data-action="Imagens para PDF"><span
+                                                    class="material-symbols-outlined">collections_bookmark</span><span
+                                                    class="tool-name">Imagens p/ PDF</span></button>
+                                            <button class="tool-item" data-action="PDF para Imagens"><span
+                                                    class="material-symbols-outlined">imagesmode</span><span
+                                                    class="tool-name">PDF p/ Imagens</span></button>
+                                            <button class="tool-item" data-action="Fatiar PDF por Tamanho"><span
+                                                    class="material-symbols-outlined">data_usage</span><span
+                                                    class="tool-name">Fatiar por MB</span></button>
+                                        </div>
+
+                                        <div class="tool-category">
+                                            <div class="cat-title">Edição Avançada</div>
+                                            <button class="tool-item" data-action="Rotacionar PDF"><span
+                                                    class="material-symbols-outlined">rotate_right</span><span
+                                                    class="tool-name">Rotacionar PDF</span></button>
+                                            <button class="tool-item" data-action="Remover Páginas"><span
+                                                    class="material-symbols-outlined">delete_sweep</span><span
+                                                    class="tool-name">Remover Páginas</span></button>
+                                            <button class="tool-item" data-action="Numerar Páginas"><span
+                                                    class="material-symbols-outlined">format_list_numbered</span><span
+                                                    class="tool-name">Numerar Páginas</span></button>
+                                            <button class="tool-item" data-action="Adicionar Marca d'Água"><span
+                                                    class="material-symbols-outlined">branding_watermark</span><span
+                                                    class="tool-name">Marca d'Água</span></button>
+                                            <button class="tool-item" data-action="Extrair Páginas"><span
+                                                    class="material-symbols-outlined">file_copy</span><span
+                                                    class="tool-name">Extrair Páginas</span></button>
+                                            <button class="tool-item" data-action="Reparar PDF"><span
+                                                    class="material-symbols-outlined">healing</span><span
+                                                    class="tool-name">Reparar PDF</span></button>
+                                        </div>
+
+                                        <div class="tool-category">
+                                            <div class="cat-title">Segurança & Otimização</div>
+                                            <button class="tool-item" data-action="Proteger PDF"><span
+                                                    class="material-symbols-outlined">lock</span><span
+                                                    class="tool-name">Proteger PDF</span></button>
+                                            <button class="tool-item" data-action="Desbloquear PDF"><span
+                                                    class="material-symbols-outlined">lock_open</span><span
+                                                    class="tool-name">Desbloquear PDF</span></button>
+                                            <button class="tool-item" data-action="Sanitizar Arquivo"><span
+                                                    class="material-symbols-outlined">cleaning_services</span><span
+                                                    class="tool-name">Sanitizar Arquivo</span></button>
+                                            <button class="tool-item" data-action="Comprimir Arquivo"><span
+                                                    class="material-symbols-outlined">compress</span><span
+                                                    class="tool-name">Comprimir Arquivo</span></button>
+                                            <button class="tool-item" data-action="Censurar PDF (Tarja Preta)"><span
+                                                    class="material-symbols-outlined">visibility_off</span><span
+                                                    class="tool-name">Censurar (LGPD)</span></button>
+                                            <button class="tool-item" data-action="Assinar PDF"><span
+                                                    class="material-symbols-outlined">workspace_premium</span><span
+                                                    class="tool-name">Assinar PDF (A1)</span></button>
+                                        </div>
+                                    </div>
+                                </aside>
+                                <!-- Coluna 1: Workspace -->
+                                <div class="workspace-pane">
+                                    <!-- Dropzone interativa M3 -->
+                                    <div class="dropzone" id="dropzone">
+                                        <span class="upload-icon">cloud_upload</span>
+                                        <div class="primary-text">Arraste seus arquivos aqui ou clique para selecionar
+                                        </div>
+                                        <div class="secondary-text">Suporta múltiplos documentos, tabelas, imagens e
+                                            mídias</div>
+                                    </div>
+
+                                    <div id="preview-section" class="hidden"
+                                        style="flex: 1; display: flex; flex-direction: column; background: var(--md-sys-color-surface-variant); border: 1px solid var(--glass-border); border-radius: 24px; padding: 16px; min-height: 0; position: relative;">
+                                        <div id="preview-drag-overlay"
+                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(56, 189, 248, 0.08); border: 2px dashed var(--md-sys-color-primary); border-radius: 24px; display: none; align-items: center; justify-content: center; z-index: 99; pointer-events: none;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 48px; color: var(--md-sys-color-primary);">upload_file</span>
+                                        </div>
+
+                                        <div
+                                            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 16px; flex-shrink: 0;">
+                                            <div
+                                                style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                                                <span class="material-symbols-outlined"
+                                                    style="color: var(--md-sys-color-primary); flex-shrink: 0;">visibility</span>
+                                                <span id="preview-filename"
+                                                    style="font-weight: 600; font-size: 15px; color: var(--md-sys-color-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;">nome_do_arquivo.ext</span>
+                                            </div>
+
+                                            <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+                                                <button id="btn-add-more"
+                                                    style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; border-radius: 8px; padding: 6px 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s;">
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size: 18px;">add_circle</span> Mais Arquivos
+                                                </button>
+                                                <span id="preview-counter"
+                                                    style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); font-weight: 500;">1
+                                                    / 1</span>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            style="flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 0;">
+                                            <button id="btn-prev-preview" class="nav-arrow" title="Arquivo Anterior">
+                                                <span class="material-symbols-outlined">chevron_left</span>
+                                            </button>
+
+                                            <div id="preview-content-container"
+                                                style="flex: 1; display: flex; justify-content: center; align-items: center; height: 100%; overflow: hidden; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                                            </div>
+
+                                            <button id="btn-next-preview" class="nav-arrow" title="Próximo Arquivo">
+                                                <span class="material-symbols-outlined">chevron_right</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <!-- Coluna 2: Inspector -->
+                                <aside class="inspector-pane">
+                                    <!-- Barra de configurações -->
+                                    <div class="config-bar">
+
+                                        <md-outlined-select label="Formato de Saída" id="format-select" disabled>
+                                            <md-select-option selected value="">
+                                                <div slot="headline">Insira arquivos na fila</div>
+                                            </md-select-option>
+                                        </md-outlined-select>
+
+                                        <md-outlined-text-field type="password" id="input-password" label="Senha do PDF"
+                                            class="hidden"></md-outlined-text-field>
+
+                                        <md-outlined-text-field id="input-censor" label="Palavra ou CPF a Censurar"
+                                            class="hidden"></md-outlined-text-field>
+                                        <md-outlined-text-field id="input-extract"
+                                            label="Páginas a Extrair (ex: 2, 5-8)"
+                                            class="hidden"></md-outlined-text-field>
+
+                                        <div id="pfx-upload-container" class="hidden"
+                                            style="display:flex; flex-direction:column; gap:8px;">
+                                            <span
+                                                style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">Certificado
+                                                Digital A1 (.pfx / .p12)</span>
+                                            <md-filled-button type="button"
+                                                onclick="document.getElementById('input-pfx').click()">Selecionar
+                                                Certificado</md-filled-button>
+                                            <span id="pfx-filename"
+                                                style="font-size:12px; color:var(--md-sys-color-primary); text-align:center;">Nenhum
+                                                selecionado</span>
+                                            <input type="file" id="input-pfx" accept=".pfx,.p12" style="display:none;"
+                                                onchange="document.getElementById('pfx-filename').textContent = this.files[0] ? this.files[0].name : 'Nenhum selecionado'">
+                                        </div>
+
+                                        <md-outlined-text-field id="input-watermark"
+                                            label="Texto da Marca (ex: CONFIDENCIAL)" value="CONFIDENCIAL"
+                                            class="hidden"></md-outlined-text-field>
+
+                                        <md-outlined-text-field id="input-pages"
+                                            label="Páginas a Remover (ex: 1, 3, 5-10)"
+                                            class="hidden"></md-outlined-text-field>
+
+                                        <md-outlined-select id="select-angle" label="Graus de Rotação" class="hidden">
+                                            <md-select-option selected value="90">
+                                                <div slot="headline">90°</div>
+                                            </md-select-option>
+                                            <md-select-option value="180">
+                                                <div slot="headline">180°</div>
+                                            </md-select-option>
+                                            <md-select-option value="270">
+                                                <div slot="headline">270°</div>
+                                            </md-select-option>
+                                        </md-outlined-select>
+
+                                        <md-outlined-text-field label="Delimitador" value=";" id="delimiter-field"
+                                            disabled></md-outlined-text-field>
+                                        <md-outlined-text-field id="input-mb" label="Tamanho Limite (MB)" value="20"
+                                            type="number" class="hidden"></md-outlined-text-field>
+                                        <md-outlined-text-field id="input-rename"
+                                            label="Padrão (ex: {i} - {nome} [sufixo])" value="{i} - {nome} []"
+                                            class="hidden"></md-outlined-text-field>
+
+                                        <!-- Fila de arquivos selecionados -->
+                                        <div id="file-queue"></div>
+                                    </div>
+
+                                    <!-- Progresso da Conversão -->
+                                    <div class="progress-wrapper" id="progress-wrapper">
+                                        <div class="progress-label" id="progress-label">Processando fila de arquivos
+                                            offline...</div>
+                                        <md-linear-progress indeterminate id="progress-bar"></md-linear-progress>
+                                    </div>
+
+                                    <!-- Botão de execução alinhado à direita -->
+                                    <div class="actions">
+                                        <md-filled-button id="convert-btn" disabled onclick="startBatchConversion()">
+                                            <span slot="icon" class="material-symbols-outlined">play_arrow</span>
+                                            Iniciar Conversão
+                                        </md-filled-button>
+                                    </div>
+                                </aside>
                             </div>
+
+                            <!-- Alertas e resultados -->
+                            <div class="status-alert" id="status-alert"></div>
                         </div>
 
-                        <!-- Coluna 2: Inspector -->
-                        <aside class="inspector-pane">
-                            <!-- Barra de configurações -->
-                            <div class="config-bar">
-
-                                <md-outlined-select label="Formato de Saída" id="format-select" disabled>
-                                    <md-select-option selected value="">
-                                        <div slot="headline">Insira arquivos na fila</div>
-                                    </md-select-option>
-                                </md-outlined-select>
-
-                                <md-outlined-text-field type="password" id="input-password" label="Senha do PDF" class="hidden"></md-outlined-text-field>
-
-                                <md-outlined-text-field id="input-censor" label="Palavra ou CPF a Censurar" class="hidden"></md-outlined-text-field>
-                                <md-outlined-text-field id="input-extract" label="Páginas a Extrair (ex: 2, 5-8)" class="hidden"></md-outlined-text-field>
-                                
-                                <div id="pfx-upload-container" class="hidden" style="display:flex; flex-direction:column; gap:8px;">
-                                    <span style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">Certificado Digital A1 (.pfx / .p12)</span>
-                                    <md-filled-button type="button" onclick="document.getElementById('input-pfx').click()">Selecionar Certificado</md-filled-button>
-                                    <span id="pfx-filename" style="font-size:12px; color:var(--md-sys-color-primary); text-align:center;">Nenhum selecionado</span>
-                                    <input type="file" id="input-pfx" accept=".pfx,.p12" style="display:none;" onchange="document.getElementById('pfx-filename').textContent = this.files[0] ? this.files[0].name : 'Nenhum selecionado'">
-                                </div>
-
-                                <md-outlined-text-field id="input-watermark" label="Texto da Marca (ex: CONFIDENCIAL)" value="CONFIDENCIAL" class="hidden"></md-outlined-text-field>
-
-                                <md-outlined-text-field id="input-pages" label="Páginas a Remover (ex: 1, 3, 5-10)" class="hidden"></md-outlined-text-field>
-
-                                <md-outlined-select id="select-angle" label="Graus de Rotação" class="hidden">
-                                    <md-select-option selected value="90"><div slot="headline">90°</div></md-select-option>
-                                    <md-select-option value="180"><div slot="headline">180°</div></md-select-option>
-                                    <md-select-option value="270"><div slot="headline">270°</div></md-select-option>
-                                </md-outlined-select>
-
-                                <md-outlined-text-field label="Delimitador" value=";" id="delimiter-field" disabled></md-outlined-text-field>
-                                
-                                <!-- Fila de arquivos selecionados -->
-                                <div id="file-queue"></div>
-                            </div>
-
-                            <!-- Progresso da Conversão -->
-                            <div class="progress-wrapper" id="progress-wrapper">
-                                <div class="progress-label" id="progress-label">Processando fila de arquivos offline...</div>
-                                <md-linear-progress indeterminate id="progress-bar"></md-linear-progress>
-                            </div>
-
-                            <!-- Botão de execução alinhado à direita -->
-                            <div class="actions">
-                                <md-filled-button id="convert-btn" disabled onclick="startBatchConversion()">
-                                    <span slot="icon" class="material-symbols-outlined">play_arrow</span>
-                                    Iniciar Conversão
-                                </md-filled-button>
-                            </div>
+                        <aside id="terminal-container" class="hidden">
+                            <h3>Log em Tempo Real</h3>
+                            <div id="terminal-output"></div>
                         </aside>
                     </div>
+                </section>
 
-                    <!-- Alertas e resultados -->
-                    <div class="status-alert" id="status-alert"></div>
-                </div>
+                <!-- 2. VIEW HISTORY (HISTÓRICO SIMULADO) -->
+                <section id="view-history" class="view">
+                    <div class="dashboard-card">
+                        <h2>Histórico de Conversões</h2>
+                        <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin-bottom: 24px;">
+                            Visualização dos arquivos recentemente processados no servidor offline.
+                        </p>
 
-                <aside id="terminal-container" class="hidden">
-                    <h3>Log em Tempo Real</h3>
-                    <div id="terminal-output"></div>
-                </aside>
+                        <div class="history-list" id="dynamic-history-list">
+                            <div
+                                style="text-align: center; color: var(--md-sys-color-on-surface-variant); margin-top: 40px;">
+                                <span class="material-symbols-outlined"
+                                    style="font-size: 48px; opacity: 0.5;">history</span>
+                                <p style="margin-top: 16px;">O histórico de conversões desta sessão aparecerá aqui.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. VIEW SETTINGS (CONFIGURAÇÕES TIPO M3) -->
+                <section id="view-settings" class="view">
+                    <div class="dashboard-card">
+                        <h2>Configurações Globais</h2>
+                        <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin-bottom: 24px;">
+                            Ajuste os parâmetros globais do motor de conversão offline.
+                        </p>
+
+
+
+                        <div class="settings-row">
+                            <div class="settings-info">
+                                <div class="settings-title">Delimitador CSV Padrão</div>
+                                <div class="settings-desc">Configura o caractere separador inicial de novos arquivos
+                                    CSV.</div>
+                            </div>
+                            <md-outlined-text-field value=";" style="width: 80px;"
+                                id="global-delim-field"></md-outlined-text-field>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-info">
+                                <div class="settings-title">Aviso Sonoro de Conclusão</div>
+                                <div class="settings-desc">Toca um alerta ao finalizar conversões longas em lote.</div>
+                            </div>
+                            <md-switch id="sound-alert-switch"></md-switch>
+                        </div>
+
+                        <div class="settings-row" style="border-bottom: none;">
+                            <div class="settings-info">
+                                <div class="settings-title">Exibir Log de Conversão em Tempo Real</div>
+                                <div class="settings-desc">Abre um terminal que mostra os processos do motor em tempo
+                                    real.</div>
+                            </div>
+                            <md-switch id="toggle-terminal"></md-switch>
+                        </div>
+                    </div>
+                </section>
+
             </div>
-            </section>
-
-            <!-- 2. VIEW HISTORY (HISTÓRICO SIMULADO) -->
-            <section id="view-history" class="view">
-                <div class="dashboard-card">
-                    <h2>Histórico de Conversões</h2>
-                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin-bottom: 24px;">
-                        Visualização dos arquivos recentemente processados no servidor offline.
-                    </p>
-
-                    <div class="history-list" id="dynamic-history-list">
-                        <div style="text-align: center; color: var(--md-sys-color-on-surface-variant); margin-top: 40px;">
-                            <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5;">history</span>
-                            <p style="margin-top: 16px;">O histórico de conversões desta sessão aparecerá aqui.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. VIEW SETTINGS (CONFIGURAÇÕES TIPO M3) -->
-            <section id="view-settings" class="view">
-                <div class="dashboard-card">
-                    <h2>Configurações Globais</h2>
-                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin-bottom: 24px;">
-                        Ajuste os parâmetros globais do motor de conversão offline.
-                    </p>
-
-
-
-                    <div class="settings-row">
-                        <div class="settings-info">
-                            <div class="settings-title">Delimitador CSV Padrão</div>
-                            <div class="settings-desc">Configura o caractere separador inicial de novos arquivos CSV.</div>
-                        </div>
-                        <md-outlined-text-field value=";" style="width: 80px;" id="global-delim-field"></md-outlined-text-field>
-                    </div>
-
-                    <div class="settings-row">
-                        <div class="settings-info">
-                            <div class="settings-title">Aviso Sonoro de Conclusão</div>
-                            <div class="settings-desc">Toca um alerta ao finalizar conversões longas em lote.</div>
-                        </div>
-                        <md-switch id="sound-alert-switch"></md-switch>
-                    </div>
-
-                    <div class="settings-row" style="border-bottom: none;">
-                        <div class="settings-info">
-                            <div class="settings-title">Exibir Log de Conversão em Tempo Real</div>
-                            <div class="settings-desc">Abre um terminal que mostra os processos do motor em tempo real.</div>
-                        </div>
-                        <md-switch id="toggle-terminal"></md-switch>
-                    </div>
-                </div>
-            </section>
-
         </div>
-    </div>
 
     </div>
     <script src="/static/script.js" defer></script>
 </body>
+
 </html>
