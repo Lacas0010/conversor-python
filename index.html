@@ -62,9 +62,9 @@
                             style="color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; flex: 1; overflow-y: auto; padding-right: 12px; min-height: 0;">
                             <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">1. Converter Formatos</h3>
                             <p>Selecione <strong>"Converter Formato"</strong>, arraste seus arquivos, escolha o formato
-                                de saída (suportando PDF, DOCX, TXT, planilhas CSV, XLSX, XLS, dados Parquet,
+                                de saída (suportando PDF, DOCX, TXT, planilhas CSV, XLSX, XLS, XML, dados Parquet,
                                 apresentações PPT/PPTX e exportação de GIFs animados a partir de vídeos) e clique em
-                                Iniciar. Ideal para conversões universais individuais.</p>
+                                Iniciar. Suporta também a conversão bidirecional entre dados XML e planilhas Excel (XLS/XLSX). Ideal para conversões universais individuais.</p>
 
                             <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">2. Juntar PDFs</h3>
                             <p>Selecione <strong>"Juntar PDFs"</strong> e arraste <strong>múltiplos PDFs</strong>. O
@@ -420,11 +420,7 @@
                                     </div>
 
                                     <!-- Progresso da Conversão -->
-                                    <div class="progress-wrapper" id="progress-wrapper">
-                                        <div class="progress-label" id="progress-label">Processando fila de arquivos
-                                            offline...</div>
-                                        <md-linear-progress indeterminate id="progress-bar"></md-linear-progress>
-                                    </div>
+                                    <div id="progress-wrapper" class="hidden"></div>
 
                                     <!-- Botão de execução alinhado à direita -->
                                     <div class="actions">

@@ -12,7 +12,7 @@ Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **Fa
 O conversor possui 23 ferramentas organizadas em 4 categorias no painel lateral:
 
 ### 1. Conversão & Extração
-* **Converter Formato**: Conversão universal individual para mais de 50 formatos (tabelas, documentos, imagens de alta resolução/RAW, áudios, vídeos com exportação de GIFs, dados espaciais e bancos de dados sqlite).
+* **Converter Formato**: Conversão universal individual para mais de 50 formatos (tabelas, dados XML estruturados, documentos, imagens de alta resolução/RAW, áudios, vídeos com exportação de GIFs, dados espaciais e bancos de dados sqlite).
 * **Converter Lote (ZIP)**: Processamento paralelo de múltiplos arquivos, retornando um pacote `.zip` consolidado.
 * **Extrair Tabelas (PDF)**: Varre o documento PDF procurando tabelas nativas e as exporta para planilhas `.xlsx` ou `.csv` estruturadas.
 * **OCR (Texto)**: Escaneamento óptico de PDFs digitalizados ou imagens para extração de texto estruturado para arquivos `.docx` ou `.txt`.
@@ -91,7 +91,7 @@ O projeto está preparado para ser empacotado num executável standalone.
 
 ## ⚡ Arquitetura e Recursos Avançados
 
-- **Visualizador Dinâmico Inteligente:** Área integrada na workspace principal que renderiza previews em tempo real na memória RAM (via URLs de Blob) para imagens, áudio, vídeo e PDFs, além de renderizar de forma instantânea planilhas (`.xlsx`, `.xls`, `.csv`) e documentos Word (`.docx`) com o auxílio do backend local (`pandas` e `mammoth`).
+- **Visualizador Dinâmico Inteligente:** Área integrada na workspace principal que renderiza previews em tempo real na memória RAM (via URLs de Blob) para imagens, áudio, vídeo e PDFs, além de renderizar de forma instantânea planilhas (`.xlsx`, `.xls`, `.csv`), dados estruturados (`.xml`) e documentos Word (`.docx`) com o auxílio do backend local (`pandas` e `mammoth`).
 - **Película Protetora Anti-Iframe:** Camada invisível de captura de mouse que impede que iframes (como o leitor de PDF) interceptem eventos de arrastar e soltar (Drag & Drop), mantendo a experiência de carregamento de arquivos fluida.
 - **Encerramento Inteligente (Heartbeat):** Ao rodar via executável, o backend possui uma conexão WebSocket contínua com a aba do navegador. Quando o usuário fecha a aba, o servidor detecta a desconexão e encerra o processo do Python na hora de forma segura.
 - **Glassmorphism & Material Design 3:** A interface `index.html` foi reescrita com Material Design 3 em Vanilla JS com estética luxuosa de vidro, modo noturno dinâmico e micro-animações.

@@ -94,11 +94,11 @@ MAPA_FORMATOS = {
     ".wma": [".mp3", ".wav", ".flac", ".ogg", ".opus", ".m4a"],
 
     # DADOS ESTRUTURADOS (Pandas/openpyxl/pyarrow)
-    ".csv": [".xlsx", ".xls", ".json", ".parquet"],
-    ".tsv": [".xlsx", ".xls", ".json", ".parquet"],
-    ".xlsx": [".csv", ".xls", ".json", ".parquet"],
-    ".xls": [".xlsx", ".csv", ".json", ".parquet"],
-    ".parquet": [".xlsx", ".csv", ".json"],
+    ".csv": [".xlsx", ".xls", ".json", ".parquet", ".xml"],
+    ".tsv": [".xlsx", ".xls", ".json", ".parquet", ".xml"],
+    ".xlsx": [".csv", ".xls", ".json", ".parquet", ".xml"],
+    ".xls": [".xlsx", ".csv", ".json", ".parquet", ".xml"],
+    ".parquet": [".xlsx", ".csv", ".json", ".xml"],
     ".json": [".csv", ".xlsx", ".xls", ".xml", ".yaml", ".parquet"],
 
     # DOCUMENTOS GERAIS
@@ -114,14 +114,14 @@ MAPA_FORMATOS = {
     ".pptx": [".pdf", ".txt"],
 
     # ARQUIVOS OPENDOCUMENT (LibreOffice / Pandas engine odf)
-    ".ods": [".xlsx", ".xls", ".csv"],
+    ".ods": [".xlsx", ".xls", ".csv", ".xml"],
     ".odp": [".pdf", ".txt", ".pptx"],
 
     # BANCOS DE DADOS E INFRAESTRUTURA
     ".sqlite": [".xlsx", ".csv", ".json"],
     ".db": [".xlsx", ".csv", ".json"],
     ".sql": [".json", ".csv"],
-    ".xml": [".json"],
+    ".xml": [".json", ".xlsx", ".xls", ".csv", ".tsv", ".parquet", ".yaml"],
     ".yaml": [".json"],
     ".yml": [".json"],
 
@@ -277,9 +277,13 @@ def converter_dados(origem: str, destino: str, delimitador: str = ";") -> None:
                 return
             df = pd.read_json(origem)
         elif ext_origem == ".xml":
-            # Conversão Xml para Json
-            converter_xml_json(origem, destino)
-            return
+            if ext_destino == ".json":
+                converter_xml_json(origem, destino)
+                return
+            try:
+                df = pd.read_xml(origem)
+            except Exception as e:
+                raise ConversionError(f"Erro ao ler arquivo XML: {str(e)}")
         elif ext_origem in (".yaml", ".yml"):
             try:
                 import yaml
@@ -303,7 +307,7 @@ def converter_dados(origem: str, destino: str, delimitador: str = ";") -> None:
         elif ext_destino == ".json":
             df.to_json(destino, orient="records", indent=4, force_ascii=False)
         elif ext_destino == ".xml":
-            raise ConversionError("A geração direta de XML a partir de tabelas brutas requer modelagem estrutural. Utilize fontes JSON para XML.")
+            df.to_xml(destino, index=False)
         elif ext_destino == ".yaml":
             try:
                 import yaml

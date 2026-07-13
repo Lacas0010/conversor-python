@@ -502,14 +502,29 @@ header p {
     flex: none;
 }
 
-/* Progress Wrapper */
-.progress-wrapper {
-    display: none;
-    margin-bottom: 24px;
-    background: var(--md-sys-color-surface-container-low);
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid var(--glass-border);
+/* Contêiner da barra na lateral direita */
+#progress-wrapper {
+    width: 100%;
+    margin: 16px 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+/* TRUQUE DE VALOR: Se estiver na classe hidden OU estiver totalmente vazio, desaparece 100% */
+#progress-wrapper.hidden,
+#progress-wrapper:empty {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* O padding só existe quando o contêiner tiver conteúdo dentro */
+#progress-wrapper:not(:empty) {
+    padding: 14px;
 }
 
 .progress-label {
@@ -892,3 +907,167 @@ header p {
     filter: brightness(1.1);
     transform: scale(1.02);
 }
+
+/* =========================================
+   MOTION UI & MICRO-INTERAÇÕES
+   ========================================= */
+
+/* 1. Animações Base (@keyframes) */
+@keyframes wobble {
+    0% { transform: translateX(0%); }
+    15% { transform: translateX(-5%) rotate(-3deg); }
+    30% { transform: translateX(4%) rotate(2deg); }
+    45% { transform: translateX(-3%) rotate(-2deg); }
+    60% { transform: translateX(2%) rotate(1deg); }
+    75% { transform: translateX(-1%) rotate(-1deg); }
+    100% { transform: translateX(0%); }
+}
+
+@keyframes squish {
+    0% { transform: scale(1, 1); }
+    25% { transform: scale(1.05, 0.95); }
+    50% { transform: scale(0.95, 1.05); }
+    75% { transform: scale(1.02, 0.98); }
+    100% { transform: scale(1, 1); }
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(56, 189, 248, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+@keyframes float-gentle {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+    60% { opacity: 1; transform: scale(1.02) translateY(-2px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* 2. Aplicação das Animações nos Elementos */
+
+/* Ícones da barra lateral tremem (wobble) ao passar o rato */
+.tool-item:hover span.material-symbols-outlined {
+    animation: wobble 0.6s ease-in-out;
+    color: var(--md-sys-color-primary);
+}
+
+/* Botões da barra lateral espremem-se (squish) ao clicar */
+.tool-item:active {
+    animation: squish 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* O Dropzone respira (pulse) para convidar ao clique e flutua suavemente */
+#dropzone {
+    animation: float-gentle 4s ease-in-out infinite;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Quando o utilizador arrasta um ficheiro por cima, o dropzone reage fortemente */
+#dropzone.dragover {
+    transform: scale(1.05);
+    background: rgba(56, 189, 248, 0.1) !important;
+    border-color: var(--md-sys-color-primary) !important;
+    animation: pulse-glow 1.5s infinite;
+}
+
+/* A nuvem dentro do dropzone faz squish ao passar o rato */
+#dropzone:hover .material-symbols-outlined {
+    animation: squish 0.5s ease-in-out;
+}
+
+/* O Visualizador entra com um efeito "Pop" quando é revelado */
+#preview-section:not(.hidden) {
+    animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Os itens da fila de ficheiros entram com suavidade */
+.file-item {
+    animation: pop-in 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* As setas do visualizador dão um saltinho ao clicar */
+.nav-arrow:active {
+    transform: scale(0.85) !important;
+}
+
+/* Orb flutuante de fundo ganha vida */
+.ambient-orb {
+    animation: float-gentle 8s ease-in-out infinite alternate;
+}
+
+/* =========================================
+   ANIMAÇÕES DE TOGGLE E CARREGAMENTO (MD3)
+   ========================================= */
+
+/* Efeito Stretch orgânico para Switches e Checkboxes */
+@keyframes stretch-toggle {
+    0% { transform: scale(1, 1); }
+    40% { transform: scale(1.12, 0.88); }
+    100% { transform: scale(1, 1); }
+}
+
+/* Aplica o stretch quando o usuário pressiona o botão/switch */
+md-switch:active, 
+md-checkbox:active,
+.md-slider:active {
+    animation: stretch-toggle 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Estilização da Barra de Progresso MD3 com Glassmorphism */
+md-linear-progress {
+    --md-linear-progress-track-color: var(--glass-highlight);
+    --md-linear-progress-active-indicator-color: var(--md-sys-color-primary);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* Container que segura o progresso e o texto */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-top: 16px;
+    animation: pop-in 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.loading-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--md-sys-color-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Animação Ondulada Estilo Material 3 */
+@keyframes wavy-animation {
+    0% { background-position: 0% 0%; }
+    100% { background-position: -200% 0%; }
+}
+
+/* Preenchimento Ondulado Nativo com Fallback */
+#batch-progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background-color: #38bdf8; /* Cor de segurança caso o gradiente falhe */
+    background: linear-gradient(
+        90deg, 
+        #0284c7 0%, 
+        #38bdf8 25%, 
+        #0284c7 50%, 
+        #38bdf8 75%, 
+        #0284c7 100%
+    );
+    background-size: 200% 100%;
+    animation: wavy-animation 1.2s linear infinite;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

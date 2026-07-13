@@ -520,7 +520,26 @@ function playCompletionSound() {
 async function startBatchConversion() {
     if (selectedFiles.length === 0) return;
 
-    progressWrapper.style.display = 'block';
+    if (progressWrapper) {
+        progressWrapper.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500; color: #38bdf8;">
+                    <span id="batch-progress-text">Processando arquivo(s)...</span>
+                    <span id="batch-progress-counter" style="font-variant-numeric: tabular-nums;">0%</span>
+                </div>
+                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                    <div id="batch-progress-bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+        `;
+        progressWrapper.classList.remove('hidden');
+        progressWrapper.style.display = 'block';
+    }
+
+    const progressBarFill = document.getElementById('batch-progress-bar-fill');
+    const progressText = document.getElementById('batch-progress-text');
+    const progressCounter = document.getElementById('batch-progress-counter');
+
     convertBtn.setAttribute('disabled', 'true');
     clearAlert();
 
@@ -583,21 +602,38 @@ async function startBatchConversion() {
     ].includes(action);
 
     if (isBatchAction) {
-        let progressText = `Processando ${selectedFiles.length} arquivos...`;
+        let batchMsg = `Processando ${selectedFiles.length} arquivos...`;
         if (action === "Converter em Lote (ZIP)") {
-            progressText = `Convertendo e compactando ${selectedFiles.length} arquivos em lote...`;
+            batchMsg = `Convertendo e compactando ${selectedFiles.length} arquivos em lote...`;
         } else if (action === "Renomear em Lote (ZIP)") {
-            progressText = `Renomeando e compactando ${selectedFiles.length} arquivos em lote...`;
+            batchMsg = `Renomeando e compactando ${selectedFiles.length} arquivos em lote...`;
         } else if (action === "Imagens para PDF") {
-            progressText = `Combinando ${selectedFiles.length} imagens em um único PDF...`;
+            batchMsg = `Combinando ${selectedFiles.length} imagens em um único PDF...`;
         } else if (action === "Juntar DOCX") {
-            progressText = `Combinando ${selectedFiles.length} documentos em um único DOCX...`;
+            batchMsg = `Combinando ${selectedFiles.length} documentos em um único DOCX...`;
         } else if (action === "Extrair Tabelas (PDF)") {
-            progressText = `Extraindo tabelas de ${selectedFiles.length} PDFs em lote...`;
+            batchMsg = `Extraindo tabelas de ${selectedFiles.length} PDFs em lote...`;
         } else if (action === "Reconhecimento OCR") {
-            progressText = `Executando OCR em ${selectedFiles.length} arquivos em lote...`;
+            batchMsg = `Executando OCR em ${selectedFiles.length} arquivos em lote...`;
         }
-        document.getElementById('progress-label').textContent = progressText;
+        
+        if (progressText) progressText.textContent = batchMsg;
+
+        let currentSimulatedProgress = 0;
+        const maxSimulatedProgress = 0.90;
+        const tempoEstimadoMs = selectedFiles.length * 1500;
+        const intervaloMs = 200; 
+        const passo = maxSimulatedProgress / (tempoEstimadoMs / intervaloMs);
+
+        const progressInterval = setInterval(() => {
+            if (currentSimulatedProgress < maxSimulatedProgress) {
+                currentSimulatedProgress += passo;
+                
+                const porcentagem = Math.floor(currentSimulatedProgress * 100);
+                if (progressBarFill) progressBarFill.style.width = `${porcentagem}%`;
+                if (progressCounter) progressCounter.textContent = `${porcentagem}%`;
+            }
+        }, intervaloMs);
 
         const formData = new FormData();
         formData.append('acao', action);
@@ -616,6 +652,11 @@ async function startBatchConversion() {
         try {
             const response = await fetch('/api/converter', { method: 'POST', body: formData });
             if (response.ok) {
+                clearInterval(progressInterval);
+                if (progressBarFill) progressBarFill.style.width = '100%';
+                if (progressCounter) progressCounter.textContent = "100%";
+                if (progressText) progressText.textContent = "Empacotando arquivo final...";
+                
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -663,6 +704,7 @@ async function startBatchConversion() {
                     </div>
                 ` + historyList.innerHTML;
             } else {
+                clearInterval(progressInterval);
                 const errResult = await response.json().catch(() => ({}));
                 let errLabel = "Erro no processamento";
                 if (action === "Converter em Lote (ZIP)") errLabel = "Erro ao processar lote";
@@ -675,13 +717,20 @@ async function startBatchConversion() {
                 errorsCount++;
             }
         } catch (err) {
+            clearInterval(progressInterval);
             showAlert(`Falha de rede: ${err.message}`, 'error');
             errorsCount++;
         }
     } else {
+        const progressBarFillLocal = document.getElementById('batch-progress-bar-fill');
+        const progressText = document.getElementById('batch-progress-text');
+        const progressCounter = document.getElementById('batch-progress-counter');
+
         for (let i = 0; i < selectedFiles.length; i++) {
             const file = selectedFiles[i];
-            document.getElementById('progress-label').textContent = `Processando: ${file.name} (${i + 1}/${selectedFiles.length})...`;
+            
+            if (progressText) progressText.textContent = `Convertendo: ${file.name}`;
+            if (progressCounter) progressCounter.textContent = `${i + 1} / ${selectedFiles.length}`;
 
             const formData = new FormData();
             formData.append('files', file);
@@ -750,12 +799,21 @@ async function startBatchConversion() {
                 showAlert(`Falha de rede ao processar ${file.name}: ${err.message}`, 'error');
                 errorsCount++;
             }
+            
+            if (progressBarFillLocal) {
+                const pct = Math.floor(((i + 1) / selectedFiles.length) * 100);
+                progressBarFillLocal.style.width = `${pct}%`;
+            }
         }
     }
 
-    progressWrapper.style.display = 'none';
+    if (progressWrapper) {
+        progressWrapper.innerHTML = '';
+        progressWrapper.classList.add('hidden');
+    }
     convertBtn.removeAttribute('disabled');
-    document.getElementById('progress-label').textContent = 'Processando fila de arquivos offline...';
+    const resetText = document.getElementById('batch-progress-text');
+    if (resetText) resetText.textContent = 'Processando fila de arquivos offline...';
 
     if (errorsCount === 0) {
         showAlert(`<strong>Conversão concluída com sucesso!</strong><br>Todos os ${successCount} arquivo(s) foram baixados diretamente no seu navegador.`, 'success');

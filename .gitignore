@@ -22,6 +22,9 @@ dist/
 
 # Temporários da Aplicação
 temp_uploads/
+test_input.*
+test_output.*
+test.*
 *.zip
 *.pfx
 *.p12
