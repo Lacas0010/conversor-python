@@ -52,136 +52,49 @@
             <div class="container">
 
                 <!-- 0. VIEW COMO USAR (HELP) -->
-                <section id="view-help" class="view active">
-                    <div class="dashboard-card">
-                        <header>
-                            <h1><span class="icon">help</span> Como Usar o Conversor</h1>
-                            <p>Bem-vindo! Siga este guia rápido para utilizar todas as ferramentas avançadas.</p>
-                        </header>
-                        <div
-                            style="color: var(--md-sys-color-on-surface-variant); font-size: 15px; line-height: 1.6; flex: 1; overflow-y: auto; padding-right: 12px; min-height: 0;">
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">1. Converter Formatos</h3>
-                            <p>Selecione <strong>"Converter Formato"</strong>, arraste seus arquivos, escolha o formato
-                                de saída (suportando PDF, DOCX, TXT, planilhas CSV, XLSX, XLS, XML, dados Parquet,
-                                apresentações PPT/PPTX e exportação de GIFs animados a partir de vídeos) e clique em
-                                Iniciar. Suporta também a conversão bidirecional entre dados XML e planilhas Excel (XLS/XLSX). Ideal para conversões universais individuais.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">2. Juntar PDFs</h3>
-                            <p>Selecione <strong>"Juntar PDFs"</strong> e arraste <strong>múltiplos PDFs</strong>. O
-                                sistema unirá todos em um único documento, mantendo a ordem da fila de arquivos.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">3. Juntar DOCX</h3>
-                            <p>Selecione <strong>"Juntar DOCX"</strong> e arraste <strong>múltiplos arquivos Word (.docx)</strong>. O
-                                sistema combinará o conteúdo de todos os documentos em um único arquivo DOCX consolidado, preservando a ordem dos arquivos na fila.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">4. Dividir PDF</h3>
-                            <p>Arraste um PDF e selecione <strong>"Dividir PDF"</strong>. Cada página virará um arquivo
-                                próprio, e você receberá um arquivo `.zip` contendo as páginas fatiadas.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">5. Imagens para PDF e PDF
-                                para Imagens</h3>
-                            <p>Arraste várias imagens (PNG, JPG) e selecione <strong>"Imagens para PDF"</strong> para
-                                construir um portfólio. Ou arraste um PDF e use <strong>"PDF para Imagens"</strong> para
-                                receber páginas em alta resolução comprimidas num ZIP.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">6. Segurança de PDFs</h3>
-                            <p>Com as opções <strong>"Proteger PDF"</strong> e <strong>"Desbloquear PDF"</strong>, o
-                                campo de senha aparecerá. Você pode blindar um documento usando criptografia AES-256
-                                localmente, ou remover travas existentes se possuir a senha original.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">7. Extrair Tabelas (PDF)
-                            </h3>
-                            <p>Selecione <strong>"Extrair Tabelas (PDF)"</strong> para ler dados tabulares de dentro do
-                                PDF e convertê-los automaticamente para uma planilha <code>.xlsx</code> ou
-                                <code>.csv</code> consolidada.
-                            </p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">8. Sanitizar Arquivo</h3>
-                            <p>Use <strong>"Sanitizar Arquivo"</strong> em PDFs ou Imagens para limpar todos os
-                                metadados (incluindo EXIF, autor, software usado), garantindo total privacidade antes do
-                                compartilhamento.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">9. Comprimir Arquivo</h3>
-                            <p>Use <strong>"Comprimir Arquivo"</strong> para reduzir o peso de PDFs (removendo lixo
-                                interno) ou para recomprimir vídeos pesados usando aceleração FFmpeg, gerando arquivos
-                                mais leves sem perder qualidade.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">10. Reconhecimento OCR</h3>
-                            <p>Selecione <strong>"Reconhecimento OCR"</strong> para escanear visualmente PDFs fatiados
-                                ou imagens, extraindo o texto e transformando-o num documento editável estruturado (como
-                                <code>.docx</code> ou <code>.txt</code>).
-                            </p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">11. Edição Avançada de
-                                PDFs</h3>
-                            <p>No painel lateral, você encontra ferramentas específicas para manipulação rápida de
-                                documentos PDF:</p>
-                            <ul style="padding-left: 20px; margin-top: 8px;">
-                                <li style="margin-bottom: 8px;"><strong>Rotacionar PDF:</strong> Corrige a orientação de
-                                    todas as páginas do documento (suporta 90°, 180° e 270°).</li>
-                                <li style="margin-bottom: 8px;"><strong>Remover Páginas:</strong> Exclui páginas
-                                    específicas do PDF. Digite os números das páginas ou intervalos separados por
-                                    vírgula (ex: <code>1, 3-5, 8</code>).</li>
-                                <li style="margin-bottom: 8px;"><strong>Numerar Páginas:</strong> Insere automaticamente
-                                    o número da página (no formato "Página X de Y") no rodapé de cada folha.</li>
-                                <li style="margin-bottom: 8px;"><strong>Marca d'Água:</strong> Adiciona um texto
-                                    semitransparente personalizado centralizado em diagonal sobre todas as páginas do
-                                    PDF.</li>
-                                <li style="margin-bottom: 8px;"><strong>Extrair Páginas:</strong> Cria um novo PDF
-                                    contendo apenas as páginas indicadas (ex: <code>1, 3, 5-8</code>).</li>
-                                <li style="margin-bottom: 8px;"><strong>Reparar PDF:</strong> Reconstrói e recupera a
-                                    árvore de páginas e a tabela de referências cruzadas de arquivos PDF danificados ou
-                                    corrompidos.</li>
-                            </ul>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">12. Censura e Assinatura
-                                Digital</h3>
-                            <ul style="padding-left: 20px; margin-top: 8px;">
-                                <li style="margin-bottom: 8px;"><strong>Censurar PDF (Tarja Preta):</strong> Localiza
-                                    nomes, números, CPFs ou palavras-chave no texto do PDF e insere uma tarja preta de
-                                    censura definitiva (ideal para conformidade com a LGPD).</li>
-                                <li style="margin-bottom: 8px;"><strong>Assinar PDF (A1):</strong> Aplica uma assinatura
-                                    digital no PDF usando o seu Certificado Digital A1 corporativo (arquivos
-                                    <code>.pfx</code> ou <code>.p12</code>).
-                                 </li>
-                            </ul>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">13. Converter em Lote
-                                (ZIP)</h3>
-                            <p>Selecione <strong>"Converter Lote (ZIP)"</strong> para enviar múltiplos arquivos de uma
-                                vez. O motor converterá todos de forma paralela e os agrupará em um arquivo compactado
-                                <code>.zip</code> para download rápido.
-                            </p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">14. Visualização (Preview)
-                                de Arquivos</h3>
-                            <p>Ao arrastar ou selecionar arquivos para a aplicação, a área central se transforma em um
-                                <strong>Visualizador Dinâmico Inteligente</strong>. Formatos comuns como imagens,
-                                vídeos, áudios e PDFs são exibidos instantaneamente utilizando a memória RAM local.
-                                Formatos corporativos do Office (Word <code>.docx</code>, planilhas Excel
-                                <code>.xlsx</code>/<code>.xls</code> e arquivos delimitados <code>.csv</code>) contam
-                                com renderização dinâmica gerada sob demanda localmente pelo backend offline.
-                            </p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">15. Fatiar por MB (SEI)
-                            </h3>
-                            <p>Esta ferramenta divide um arquivo PDF individual em partes menores baseadas no tamanho
-                                limite em Megabytes definido pelo usuário. Ideal para envio em sistemas com limitação
-                                estrita de tamanho por arquivo, como o SEI ou portais de peticionamento judicial.</p>
-
-                            <h3 style="color: var(--md-sys-color-primary); margin-top: 24px;">16. Renomear em Lote</h3>
-                            <p>Permite renomear múltiplos arquivos simultaneamente de forma automatizada com base em um
-                                padrão configurável. Suporta o uso de tags dinâmicas como <code>{nome}</code> (nome
-                                original sem extensão), <code>{nome_original}</code> (nome completo com extensão) e
-                                <code>{i}</code> (índice sequencial iniciando em 1), retornando um pacote compactado
-                                <code>.zip</code> com os arquivos renomeados.
-                            </p>
+                <section id="view-help" class="view">
+                    <h2 class="view-title">Central de Ajuda</h2>
+                    <div class="help-container">
+                        
+                        <div class="security-banner">
+                            <span class="material-symbols-outlined">gpp_good</span>
+                            <div class="banner-text">
+                                <strong>Privacidade Total e Execução Local</strong>
+                                <p>Seus arquivos e dados sensíveis nunca saem da sua máquina. Processamento 100% offline e seguro.</p>
+                            </div>
+                        </div>
+                    
+                        <div class="help-grid">
+                            <div class="help-card">
+                                <div class="card-icon"><span class="material-symbols-outlined">upload_file</span></div>
+                                <h4>1. Selecione os Arquivos</h4>
+                                <p>Arraste e solte seus documentos (PDFs, Word, Imagens) na área central ou clique para navegar.</p>
+                            </div>
+                            <div class="help-card">
+                                <div class="card-icon"><span class="material-symbols-outlined">settings_suggest</span></div>
+                                <h4>2. Defina a Ação</h4>
+                                <p>Escolha a operação desejada no menu esquerdo. Ajustes e parâmetros extras aparecerão no painel da direita.</p>
+                            </div>
+                            <div class="help-card">
+                                <div class="card-icon"><span class="material-symbols-outlined">bolt</span></div>
+                                <h4>3. Processe com um Clique</h4>
+                                <p>Clique em "Iniciar Processamento". O motor local gerará seus arquivos finais em instantes de forma protegida.</p>
+                            </div>
+                        </div>
+                    
+                        <div class="pro-tips-box">
+                            <h4><span class="material-symbols-outlined">lightbulb</span> Recursos Avançados</h4>
+                            <ul>
+                                <li><strong>Processamento em Lote:</strong> Insira dezenas de arquivos simultaneamente para otimizar fluxos de trabalho repetitivos.</li>
+                                <li><strong>Limites de Upload:</strong> Utilize o "Fatiar por MB" para fracionar documentos gigantescos e adequá-los aos limites de e-mails ou sistemas web.</li>
+                                <li><strong>Sanitização Digital:</strong> Remova metadados, históricos e informações ocultas de rastreamento antes de compartilhar seus arquivos publicamente.</li>
+                             </ul>
                         </div>
                     </div>
                 </section>
 
                 <!-- 1. VIEW CONVERSOR (TELA PRINCIPAL) -->
-                <section id="view-conversor" class="view">
+                <section id="view-conversor" class="view active">
                     <div class="dashboard-layout">
                         <div class="dashboard-card">
 

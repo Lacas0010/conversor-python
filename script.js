@@ -1,23 +1,57 @@
-// SPA Routing Vanilla JS Logic
-const railBtns = document.querySelectorAll('.nav-tab');
+// SPA Routing Vanilla JS Logic (Com Roteamento Espacial Estilo Galeria)
+const railBtns = Array.from(document.querySelectorAll('.nav-tab'));
 const sections = document.querySelectorAll('.view');
+let currentTabIndex = 0; // Assume que a primeira aba começa ativa
+let isTransitioning = false; // Evita cliques múltiplos durante a animação
 
-railBtns.forEach(btn => {
+railBtns.forEach((btn, index) => {
     btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-target');
-        if (!targetId) return;
+        // Ignora se não tiver target, se já estiver na mesma aba ou se estiver em transição
+        if (!targetId || index === currentTabIndex || isTransitioning) return;
 
-        // Alterna estado dos botões da sidebar
+        isTransitioning = true;
+        
+        // Determina a direção (right = avançando, left = voltando)
+        const direction = index > currentTabIndex ? 'right' : 'left';
+
+        // Atualiza botões
         railBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Alterna exibição das telas
-        sections.forEach(section => {
-            section.classList.remove('active');
-            if (section.id === targetId) {
-                section.classList.add('active');
-            }
-        });
+        const currentView = document.getElementById(railBtns[currentTabIndex].getAttribute('data-target'));
+        const targetView = document.getElementById(targetId);
+
+        // Prepara a próxima tela (targetView) tornando-a active para que display seja flex
+        // Limpa animações anteriores dela
+        targetView.classList.remove('slide-in-right', 'slide-in-left', 'slide-out-right', 'slide-out-left');
+        targetView.classList.add('active');
+
+        // Limpa animações anteriores da tela atual (currentView)
+        currentView.classList.remove('slide-in-right', 'slide-in-left', 'slide-out-right', 'slide-out-left');
+
+        // Aplica as animações baseadas na direção para simular galeria (mudança de foto)
+        if (direction === 'right') {
+            // Avançando: a tela atual corre para a esquerda (sai) e a nova corre da direita para a esquerda (entra)
+            currentView.classList.add('slide-out-left');
+            targetView.classList.add('slide-in-right');
+        } else {
+            // Voltando: a tela atual corre para a direita (sai) e a nova corre da esquerda para a direita (entra)
+            currentView.classList.add('slide-out-right');
+            targetView.classList.add('slide-in-left');
+        }
+
+        // Quando a animação terminar (após 500ms, combinando com o tempo do CSS)
+        setTimeout(() => {
+            // Desativa a tela anterior por completo
+            currentView.classList.remove('active', 'slide-out-left', 'slide-out-right');
+            // Limpa as classes de entrada da nova tela para mantê-la no estado normal
+            targetView.classList.remove('slide-in-right', 'slide-in-left');
+            
+            // Atualiza o índice da aba atual
+            currentTabIndex = index;
+            isTransitioning = false;
+        }, 500);
     });
 });
 

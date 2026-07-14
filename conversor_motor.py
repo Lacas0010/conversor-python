@@ -1276,7 +1276,7 @@ if __name__ == "__main__":
     try:
         args = parser.parse_args()
         print("=" * 45)
-        print("CONVERSOR OFFLINE - INICIANDO MOTOR")
+        print("MUTATION ENGINE - MOTOR LOCAL DE ARQUIVOS")
         print("=" * 45)
         
         if args.compactar:
