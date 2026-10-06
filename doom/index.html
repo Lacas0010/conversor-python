@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOM 1 (1993) - Offline Player</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000000;
+            font-family: 'Consolas', 'Courier New', monospace, sans-serif;
+            color: #fca5a5;
+        }
+
+        #jsdos-wrapper {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+        }
+
+        #jsdos-wrapper canvas {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto !important;
+            height: auto !important;
+            aspect-ratio: 4 / 3;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            outline: none;
+        }
+
+        #loading-screen {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, #1c0a0a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 10;
+            transition: opacity 0.4s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .doom-title-loader {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #ef4444;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(249, 115, 22, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar-container {
+            width: 280px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 2px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ef4444, #f97316, #eab308);
+            border-radius: 4px;
+            transition: width 0.2s ease;
+        }
+
+        .loading-status {
+            font-size: 0.85rem;
+            color: #fca5a5;
+            letter-spacing: 1px;
+        }
+
+        .click-hint {
+            font-size: 0.75rem;
+            color: #a8a29e;
+            margin-top: 8px;
+        }
+    </style>
+    <!-- JS-DOS 6.22 Local Offline Library -->
+    <script src="js-dos.js"></script>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="doom-title-loader">
+            <span>💀</span> DOOM (1993)
+        </div>
+        <div class="progress-bar-container">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+        <div id="status-text" class="loading-status">Carregando DOOM1.WAD local...</div>
+        <div class="click-hint">🎮 Processamento 100% offline via WebAssembly</div>
+    </div>
+
+    <div id="jsdos-wrapper">
+        <canvas id="jsdos-canvas" tabindex="0"></canvas>
+    </div>
+
+    <script>
+        const statusText = document.getElementById('status-text');
+        const progressFill = document.getElementById('progress-fill');
+        const loadingScreen = document.getElementById('loading-screen');
+        const canvas = document.getElementById('jsdos-canvas');
+
+        function updateProgress(pct, text) {
+            if (progressFill) progressFill.style.width = pct + '%';
+            if (statusText && text) statusText.textContent = text;
+        }
+
+        updateProgress(25, 'Inicializando DOSBox WebAssembly...');
+
+        try {
+            Dos(canvas, {
+                wdosboxUrl: "wdosbox.js",
+                onprogress: (stage, total, loaded) => {
+                    if (total > 0) {
+                        const pct = Math.min(100, Math.round((loaded / total) * 100));
+                        updateProgress(pct, `Carregando ${stage} (${pct}%)...`);
+                    }
+                }
+            }).ready((fs, main) => {
+                updateProgress(65, 'Descompactando DOOM.WAD e arquivos do jogo...');
+                
+                fs.extract("doom.jsdos").then(() => {
+                    updateProgress(100, 'Iniciando DOOM.EXE...');
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden');
+                        main(["-c", "DOOM.EXE"]);
+                        setTimeout(() => {
+                            canvas.focus();
+                        }, 500);
+                    }, 300);
+                }).catch(err => {
+                    console.error("Erro ao descompactar bundle DOOM:", err);
+                    updateProgress(100, 'Falha ao descompactar o jogo localmente.');
+                });
+            }).catch(err => {
+                console.error("Erro ao iniciar DOSBox:", err);
+                updateProgress(100, 'Falha ao inicializar o motor WebAssembly.');
+            });
+        } catch (e) {
+            console.error("Erro JS-DOS:", e);
+            updateProgress(100, 'Erro ao carregar o emulador offline.');
+        }
+
+        // Garante foco no canvas ao clicar
+        window.addEventListener('click', () => {
+            if (canvas) canvas.focus();
+        });
+    </script>
+</body>
+</html>

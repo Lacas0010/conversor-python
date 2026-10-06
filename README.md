@@ -1,101 +1,118 @@
-# Conversor de Arquivos - Universal & Offline
+# Conversor de Arquivos - Universal & 100% Offline 🚀
 
-Esta é uma aplicação "Web Local" poderosa e 100% offline construída com **FastAPI**, **Vanilla JS** (Material Design 3) e **PyMuPDF**. Ela serve como um canivete suíço para arquivos, oferecendo ferramentas para manipulação avançada de PDFs, extração de planilhas e conversões de formatos — tudo diretamente no seu navegador, mas rodando inteiramente na sua própria máquina local, sem enviar dados para a internet.
+Uma suíte completa e avançada de processamento, conversão e manipulação de arquivos construída com **FastAPI**, **Vanilla JS** (Material Design 3 & Glassmorphism) e **PyMuPDF / Python Data Engine**.
 
-> [!IMPORTANT]
-> **Privacidade Absoluta:** Esta ferramenta foi desenvolvida para rodar de forma isolada. Ela não efetua conexões de rede externas, requisições de API ou telemetria, garantindo sigilo e segurança na manipulação de dados corporativos ou governamentais sensíveis.
+Funciona como um verdadeiro **canivete suíço para arquivos**, executando tudo diretamente no seu navegador, mas rodando **100% localmente na sua máquina**, sem enviar nenhum byte para a nuvem.
 
 ---
 
-## 🛠️ Ferramentas Disponíveis
+> [!IMPORTANT]
+> **Privacidade e Sigilo Absoluto:** Esta ferramenta foi projetada para operar em ambientes de alta segurança e estrita conformidade com a **LGPD**. Não realiza requisições externas, telemetria ou chamadas a APIs de terceiros.
 
-O conversor possui 23 ferramentas organizadas em 4 categorias no painel lateral:
+---
 
-### 1. Conversão & Extração
-* **Converter Formato**: Conversão universal individual para mais de 50 formatos (tabelas, dados XML estruturados, documentos, imagens de alta resolução/RAW, áudios, vídeos com exportação de GIFs, dados espaciais e bancos de dados sqlite).
-* **Converter Lote (ZIP)**: Processamento paralelo de múltiplos arquivos, retornando um pacote `.zip` consolidado.
-* **Extrair Tabelas (PDF)**: Varre o documento PDF procurando tabelas nativas e as exporta para planilhas `.xlsx` ou `.csv` estruturadas.
-* **OCR (Texto)**: Escaneamento óptico de PDFs digitalizados ou imagens para extração de texto estruturado para arquivos `.docx` ou `.txt`.
-* **Renomear em Lote**: Renomeação paralela de múltiplos arquivos com base em padrões customizáveis contendo tags dinâmicas como `{nome}`, `{nome_original}` e `{i}`.
+## ✨ Principais Destaques
 
-### 2. Organização de PDF
-* **Juntar PDFs**: Unificação de múltiplos arquivos PDF em um único documento, mantendo a ordem de envio.
-* **Juntar DOCX**: Combinação de múltiplos documentos Word (`.docx`) em um único arquivo consolidado, mantendo a ordem de envio.
-* **Dividir PDF**: Separação de todas as páginas de um PDF em arquivos individuais exportados em um `.zip`.
-* **Imagens p/ PDF**: Construção de um arquivo PDF multipágina a partir de uma fila de imagens (PNG, JPG, etc.).
-* **PDF p/ Imagens**: Extração de todas as páginas de um PDF como imagens em alta resolução compactadas em um `.zip`.
-* **Fatiar por MB (SEI)**: Fatiamento de um arquivo PDF individual em múltiplos PDFs menores de acordo com o limite de tamanho em Megabytes escolhido.
+- **⚡ Processamento 100% Local:** Sem limites de tamanho artificial de arquivos impostos por serviços em nuvem.
+- **🎨 Interface Moderna Material Design 3:** Design em vidro (*glassmorphism*), tema escuro/claro nativo, micro-animações e foco em usabilidade.
+- **👁️ Pré-Visualização Dinâmica Inteligente:** Pré-visualize instantaneamente antes e depois da conversão:
+  - Planilhas e tabelas estruturadas (`.xlsx`, `.xls`, `.csv`) via `pandas`.
+  - Documentos Word formatados (`.docx`) via `mammoth`.
+  - Arquivos PDF multipágina interativos.
+  - Imagens em alta resolução, áudios e vídeos via Blob URLs de memória RAM.
+- **🛡️ Película Anti-Iframe:** Camada protetora para permitir operações fluidas de arrastar e soltar (*Drag & Drop*) mesmo sobre visualizadores incorporados.
+- **🔌 Logs em Tempo Real:** Conexão contínua via **WebSocket** que transmite logs do backend diretamente para o console do terminal web.
+- **❤️ Encerramento Inteligente (Heartbeat):** Monitoramento de ciclo de vida via WebSocket. Ao fechar a aba do navegador, o servidor finaliza o processo local automaticamente para poupar memória.
+- **💀 Easter Egg Retro (DOOM 1993):** Emulador DOSBox WebAssembly integrado totalmente offline. Digite `iddqd` na interface para jogar o clássico DOOM (1993) em janela flutuante com som e suporte a teclado.
 
-### 3. Edição Avançada (PDF)
-* **Rotacionar PDF**: Ajuste e rotação de páginas em lote nos ângulos de 90°, 180° ou 270°.
-* **Remover Páginas**: Exclusão de páginas selecionadas do documento por números individuais ou intervalos (ex: `1, 3-5, 8`).
-* **Numerar Páginas**: Adição de numeração automática no rodapé das páginas no formato "Página X de Y".
-* **Marca d'Água**: Aplicação de marca d'água textual inclinada e semitransparente sobre todas as páginas.
-* **Extrair Páginas**: Criação de um novo PDF contendo apenas as páginas indicadas (ex: `1, 3, 5-8`).
-* **Reparar PDF**: Recuperação estrutural e de tabelas de referências cruzadas em arquivos PDF danificados ou corrompidos.
+---
 
-### 4. Segurança & Otimização
-* **Proteger PDF**: Criptografia local de PDFs usando algoritmo robusto AES-256 e senha definida pelo usuário.
-* **Desbloquear PDF**: Remoção de senhas e restrições de edição de documentos PDF (requer senha original).
-* **Sanitizar Arquivo**: Remoção de todos os metadados ocultos de privacidade em PDFs e imagens (EXIF, autores, histórico de softwares).
-* **Comprimir Arquivo**: Redução de tamanho de arquivos PDF (otimização interna) ou vídeos pesados (via aceleração de compressão FFmpeg).
-* **Censurar PDF (Tarja Preta)**: Busca por termos ou CPFs e aplica uma tarja preta definitiva sobre os textos (adequação à LGPD).
-* **Assinar PDF (A1)**: Assinatura digital do PDF usando certificados do tipo A1 (arquivos `.pfx` ou `.p12`).
+## 🛠️ Catálogo de Ferramentas (23 Funções)
 
+As ferramentas estão divididas em 4 categorias no painel de navegação:
 
+### 1. 🔄 Conversão & Extração
+* **Converter Formato:** Conversor universal para mais de 50 formatos (Documentos Office, Imagens Raster/Vetoriais, Áudios, Vídeos/GIFs, Dados Geoespaciais, XML, JSON, YAML e bancos SQLite).
+* **Converter em Lote (ZIP):** Fila de conversão paralela de múltiplos arquivos com download em pacote `.zip` compactado.
+* **Extrair Tabelas (PDF):** Localiza e extrai matrizes tabulares de PDFs para planilhas editáveis `.xlsx` ou `.csv`.
+* **Reconhecimento OCR:** Extração óptica de caracteres em documentos digitalizados e fotos, gerando arquivos `.docx` ou `.txt`.
+* **Renomear em Lote:** Padronização em massa de nomes de arquivos usando tags dinâmicas (`{nome}`, `{i}`, `{data}`).
 
-## 🚀 Como Rodar o Projeto
+### 2. 📂 Organização de PDF
+* **Juntar PDFs:** Mescla múltiplos PDFs em um único documento sequencial.
+* **Juntar DOCX:** Concatena múltiplos arquivos do Word (`.docx`) preservando estrutura e estilos.
+* **Dividir PDF:** Desmembra todas as páginas de um PDF em arquivos individuais dentro de um `.zip`.
+* **Imagens p/ PDF:** Converte uma sequência de fotos/imagens em um PDF multipágina alinhado.
+* **PDF p/ Imagens:** Exporta cada página de um PDF como imagem individual de alta resolução.
+* **Fatiar por MB (SEI):** Divide PDFs pesados em partes menores que respeitam um limite estrito de megabytes (ideal para sistemas como o SEI / Processos Eletrônicos).
 
-Você tem duas formas de rodar a aplicação:
+### 3. ✏️ Edição Avançada de PDF
+* **Rotacionar PDF:** Corrige a orientação de páginas em ângulos de 90°, 180° ou 270°.
+* **Remover Páginas:** Exclui páginas específicas ou intervalos determinados (ex: `1, 3-5, 9`).
+* **Numerar Páginas:** Insere numeração personalizada no rodapé de todas as páginas (*Página X de Y*).
+* **Adicionar Marca d'Água:** Aplica marca d'água textual diagonal com opacidade customizada sobre o conteúdo.
+* **Extrair Páginas:** Gera um novo documento contendo exclusivamente as páginas selecionadas.
+* **Reparar PDF:** Reconstrói cabeçalhos corrompidos e tabelas de referências cruzadas (`xref`) danificadas.
 
-**⚠️ Pré-requisito de Mídia (FFmpeg)**
-Para realizar conversões de áudio e vídeo (como extração de MP3 ou geração de GIFs), o motor necessita do executável do FFmpeg. Crie uma pasta chamada `ffmpeg_bin` na raiz do projeto (no mesmo nível do `server.py`) e coloque o `ffmpeg.exe` dentro dela. Caso contrário, o motor tentará buscar uma instalação global no PATH do Windows.
+### 4. 🔒 Segurança & Otimização
+* **Proteger PDF:** Criptografa o PDF com chave forte AES-256 e senha personalizada.
+* **Desbloquear PDF:** Remove senhas e restrições de permissão/impressão (necessário informar a senha atual).
+* **Sanitizar Arquivo:** Limpa metadados ocultos de PDFs e imagens (dados EXIF, histórico de edição, autor e GPS).
+* **Comprimir Arquivo:** Reduz o tamanho de PDFs e comprime vídeos pesados utilizando aceleração local.
+* **Censurar PDF (Tarja Preta):** Localiza palavras-chave, nomes ou CPFs e aplica tarja preta definitiva sobre os dados sensíveis.
+* **Assinar PDF (A1):** Aplica assinatura digital em conformidade com certificados digitais padrão ICP-Brasil / A1 (`.pfx` ou `.p12`).
 
-**⚠️ Pré-requisito de Documentos (LibreOffice)**
-Para a conversão de apresentações (PPT/PPTX), arquivos OpenDocument (ODT) ou para exportar PDFs a partir de documentos de texto, o motor busca por uma instalação do LibreOffice. Ele tentará localizar o `soffice` nos seguintes caminhos de forma automática:
-1. No PATH do sistema (instalação padrão do sistema).
-2. Na pasta local `LibreOfficePortable/` na raiz do projeto (durante desenvolvimento/script) ou **lado a lado com o executável final `Conversor_Universal.exe` (quando rodar via `.exe` na pasta `dist`)** para que o programa a encontre, e não dentro do código fonte.
-3. Nos caminhos padrão do Windows (`C:\Program Files\LibreOffice` ou `C:\Program Files (x86)\LibreOffice`).
+---
 
-### Opção 1: Via Python Script (Desenvolvimento)
+## 📦 Dependências e Pré-Requisitos
 
-1. Instale as dependências:
+### Dependências Opcionais do Sistema:
+1. **FFmpeg (Áudio & Vídeo):**
+   - Para converter vídeos, extrair MP3 ou gerar GIFs animados, coloque o executável `ffmpeg.exe` dentro da pasta `ffmpeg_bin/` na raiz do projeto (ou adicione o FFmpeg ao `PATH` do sistema).
+2. **Tesseract-OCR (OCR Local):**
+   - Para reconhecimento óptico de caracteres em PDFs escaneados ou imagens, mantenha a pasta `Tesseract-OCR/` com o executável e dados de idioma `por.traineddata` e `eng.traineddata`.
+3. **LibreOffice (Documentos & Apresentações):**
+   - Para conversões avançadas de PPT/PPTX e ODT, o motor detecta automaticamente o LibreOffice instalado no sistema ou em uma pasta `LibreOfficePortable/` local.
+
+---
+
+## 🚀 Como Executar
+
+### Método 1: Modo Script Python (Ambiente de Desenvolvimento)
+
+1. Clone ou baixe o repositório em sua máquina.
+2. Crie e ative um ambiente virtual:
+   ```bash
+   python -m venv venv
+   # No Windows:
+   .\venv\Scripts\activate
+   ```
+3. Instale as dependências:
    ```bash
    pip install -r requirements.txt
    ```
-   *Ou instale-as diretamente via terminal:*
-   ```bash
-   pip install fastapi uvicorn python-multipart PyMuPDF pandas openpyxl pdfplumber pytesseract Pillow python-docx docx2pdf xlrd pyarrow geopandas fiona pikepdf pyhanko
-   ```
-2. Inicie o servidor FastAPI:
+4. Inicie o servidor:
    ```bash
    python server.py
    ```
-3. O servidor abrirá automaticamente o seu navegador web no endereço local.
-
-### Opção 2: Via Executável (Produção .exe)
-
-O projeto está preparado para ser empacotado num executável standalone.
-
-1. Instale o PyInstaller:
-   ```bash
-   pip install pyinstaller
-   ```
-2. Compile o código:
-   ```bash
-   pyinstaller --name "Conversor_Universal" --onefile --noconsole --icon="app_icon.ico" --add-data "index.html;." --add-data "logo.svg;." --add-data "app_icon.ico;." --add-data "ffmpeg_bin;ffmpeg_bin/" --add-data "Tesseract-OCR;Tesseract-OCR/" --hidden-import="fastapi" --hidden-import="uvicorn" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan.on" server.py
-   ```
-3. Acesse a pasta `dist` recém-criada e dê um clique duplo no `Conversor_Universal.exe`.
+5. O navegador padrão será aberto automaticamente no endereço: `http://127.0.0.1:8080`.
 
 ---
 
-## ⚡ Arquitetura e Recursos Avançados
+### Método 2: Executável Standalone (.EXE para Windows)
 
-- **Visualizador Dinâmico Inteligente:** Área integrada na workspace principal que renderiza previews em tempo real na memória RAM (via URLs de Blob) para imagens, áudio, vídeo e PDFs, além de renderizar de forma instantânea planilhas (`.xlsx`, `.xls`, `.csv`), dados estruturados (`.xml`) e documentos Word (`.docx`) com o auxílio do backend local (`pandas` e `mammoth`).
-- **Película Protetora Anti-Iframe:** Camada invisível de captura de mouse que impede que iframes (como o leitor de PDF) interceptem eventos de arrastar e soltar (Drag & Drop), mantendo a experiência de carregamento de arquivos fluida.
-- **Encerramento Inteligente (Heartbeat):** Ao rodar via executável, o backend possui uma conexão WebSocket contínua com a aba do navegador. Quando o usuário fecha a aba, o servidor detecta a desconexão e encerra o processo do Python na hora de forma segura.
-- **Glassmorphism & Material Design 3:** A interface `index.html` foi reescrita com Material Design 3 em Vanilla JS com estética luxuosa de vidro, modo noturno dinâmico e micro-animações.
-- **Log em Tempo Real:** Transmissão de logs de execução do backend diretamente para o console do terminal web no navegador via WebSockets.
+O projeto pode ser empacotado em um único arquivo `.exe` executável sem necessidade de Python instalado na máquina de destino.
+
+1. Instale o PyInstaller no seu ambiente:
+   ```bash
+   pip install pyinstaller
+   ```
+2. Compile a aplicação com o comando completo:
+   ```bash
+   pyinstaller --name "Conversor_Universal" --onefile --noconsole --icon="app_icon.ico" --add-data "index.html;." --add-data "style.css;." --add-data "script.js;." --add-data "logo.svg;." --add-data "app_icon.ico;." --add-data "doom;doom/" --add-data "ffmpeg_bin;ffmpeg_bin/" --add-data "Tesseract-OCR;Tesseract-OCR/" --hidden-import="fastapi" --hidden-import="uvicorn" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan.on" server.py
+   ```
+   *(Ou utilize o arquivo de especificação já configurado `pyinstaller Conversor_Universal.spec`)*
+3. O executável final estará disponível no diretório `dist/Conversor_Universal.exe`.
 
 ---
 
@@ -103,22 +120,33 @@ O projeto está preparado para ser empacotado num executável standalone.
 
 ```text
 conversor python/
-├── index.html            # Estrutura HTML do Frontend (Material Design 3 & Glassmorphism)
-├── style.css             # Estilização CSS e efeitos visuais do Frontend
-├── script.js             # Lógica e interações do Frontend (Vanilla JS)
-├── logo.svg              # Logo da aplicação em vetor
-├── app_icon.ico          # Ícone do executável final (.exe)
-├── server.py             # Servidor Backend (FastAPI, WebSockets, Rotas API)
-├── conversor_motor.py    # Motor principal de processamento de arquivos (Python-fitz, pandas, etc.)
-├── requirements.txt      # Dependências do Python limpas e necessárias
-├── Conversor_Universal.spec # Arquivo de configuração de compilação do PyInstaller
-├── update.py             # Script de utilidade/atualização de arquivos de estilo
-├── fix_light_mode.py     # Script utilitário para correção e ajustes de cor no modo claro
-├── add_theme_toggle.py   # Script de automação para inserção do alternador de temas
-├── ffmpeg_bin/           # [Opcional] Diretório local do FFmpeg para compressão de mídia
-├── Tesseract-OCR/        # [Opcional] Diretório local do Tesseract OCR para leitura de imagens
-├── LibreOfficePortable/  # [Opcional] Diretório local do LibreOffice portátil para conversão de doc
-├── temp_uploads/         # [Temporário] Pasta gerada para upload e conversões
-└── dist/                 # [Compilado] Pasta contendo o executável standalone (.exe)
+├── index.html               # Interface principal (Material Design 3 & Glassmorphism)
+├── style.css                # Estilos visuais, temas claro/escuro e micro-animações
+├── script.js                # Lógica do frontend, WebSockets e gerenciamento de tarefas
+├── logo.svg                 # Logotipo vetorial da aplicação
+├── app_icon.ico             # Ícone oficial do executável Windows
+├── server.py                # Servidor FastAPI com endpoints REST e WebSockets
+├── conversor_motor.py       # Motor unificado de conversão e processamento de arquivos
+├── requirements.txt         # Lista de dependências Python categorizadas
+├── .gitignore               # Regras de exclusão para versionamento Git
+├── Conversor_Universal.spec # Especificação de build do PyInstaller
+│
+├── doom/                    # Easter Egg: DOOM 1 (1993) Offline WebAssembly
+│   ├── index.html           # Player em canvas do jogo
+│   ├── js-dos.js            # Emulador JS-DOS 6.22
+│   ├── wdosbox.js           # DOSBox Core JavaScript
+│   ├── wdosbox.wasm.js      # DOSBox Core WebAssembly Binário
+│   └── doom.jsdos           # Pacote com DOOM1.WAD e executável oficial
+│
+├── ffmpeg_bin/              # [Opcional] Binários do FFmpeg para processamento de áudio/vídeo
+├── Tesseract-OCR/           # [Opcional] Motor Tesseract para reconhecimento de texto
+├── LibreOfficePortable/     # [Opcional] LibreOffice portátil para conversão de apresentações
+├── temp_uploads/            # [Automático] Diretório temporário de trabalho
+└── dist/                    # [Compilado] Executável final gerado para distribuição
 ```
 
+---
+
+## 🎮 Easter Egg
+
+Durante o uso da aplicação, experimente digitar a palavra mágica **`iddqd`** em qualquer lugar da tela para acionar a janela retrô de **DOOM (1993)**, rodando de forma 100% offline direto no navegador!

@@ -1,59 +1,86 @@
-# Ambientes Virtuais
+# ==============================================================================
+# Git Ignore - Conversor Universal de Arquivos
+# ==============================================================================
+
+# --- Ambientes Virtuais & Python ---
 venv/
 env/
 .venv/
-
-# Python
+ENV/
+env.bak/
+venv.bak/
 __pycache__/
 *.py[cod]
 *$py.class
 *.log
 .env
+.env.*
 .python-version
 .pytest_cache/
 .coverage
 htmlcov/
 .ipynb_checkpoints/
 
-# PyInstaller
+# --- Compilação & PyInstaller ---
 build/
 dist/
-*.spec
+*.pyz
+*.pyc
 
-# Temporários da Aplicação
+# --- Arquivos Temporários & Processamento ---
 temp_uploads/
 test_input.*
 test_output.*
 test.*
-*.zip
+output.*
+temp/
+tmp/
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# --- Arquivos Sensíveis & Certificados Digitais ---
 *.pfx
 *.p12
 *.pem
 *.key
-*.tmp
-*.bak
+*.cer
+*.crt
+
+# --- Bancos de Dados Locais / Temporários ---
 *.db
 *.sqlite
 *.sqlite3
 
-# Binários de Terceiros
+# --- Binários Pesados / Terceiros (Opcionais / Locais) ---
 ffmpeg_bin/
 Tesseract-OCR/
 LibreOfficePortable/
+ffmpeg.exe
+ffprobe.exe
+tesseract.exe
 
-# Sistema Operacional
+# --- Arquivos de Sistema Operacional ---
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# Configurações de IDEs/Editores
+# --- Editores & IDEs ---
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.swp
-# Configurações do Gemini/Agentes
+
+# --- Customizações e Configurações de Agentes ---
 .gemini/
 .agents/

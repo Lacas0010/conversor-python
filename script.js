@@ -1174,7 +1174,7 @@ connectHeartbeat();
 
 (function initDoomEasterEgg() {
     const CHEAT_CODE = "iddqd";
-    const DOOM_URL = "https://raz0red.github.io/webprboom/";
+    const DOOM_URL = "/static/doom/index.html";
     let secretBuffer = "";
 
     const doomModal = document.getElementById("doom-modal");
