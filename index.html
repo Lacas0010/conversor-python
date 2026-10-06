@@ -415,6 +415,44 @@
         </div>
 
     </div>
+
+    <!-- =========================================
+         EASTER EGG: DOOM (1993) - IDDQD
+         ========================================= -->
+    <div id="doom-modal" class="doom-modal hidden" role="dialog" aria-modal="true" aria-labelledby="doom-title">
+        <div class="doom-backdrop" id="doom-backdrop"></div>
+        <div class="doom-window" id="doom-window">
+            <div class="doom-header">
+                <div class="doom-header-left">
+                    <span class="doom-icon">💀</span>
+                    <span id="doom-title" class="doom-title">DOOM (1993) — GOD MODE [IDDQD]</span>
+                </div>
+                <div class="doom-header-controls">
+                    <button type="button" id="doom-maximize-btn" class="doom-action-btn" title="Maximizar / Restaurar">
+                        <span class="material-symbols-outlined">fullscreen</span>
+                    </button>
+                    <button type="button" id="close-doom-btn" class="doom-action-btn doom-close" title="Fechar DOOM (ESC)">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+            <div class="doom-body">
+                <div id="doom-loader" class="doom-loader">
+                    <div class="doom-spinner"></div>
+                    <p class="doom-loading-text">Carregando DOOM Engine (WASM)...</p>
+                    <span class="doom-hint">Clique na tela do jogo para travar o teclado/mouse. Pressione ESC para sair do modo de captura.</span>
+                </div>
+                <iframe id="doom-iframe" src="" title="DOOM 1993 Web Game" allow="autoplay; fullscreen; gamepad; keyboard" allowfullscreen></iframe>
+            </div>
+            <div class="doom-footer">
+                <div class="doom-controls-guide">
+                    <span>🎮 <strong>Controles:</strong> Mover: <code>W A S D</code> ou <code>Setas</code> • Atirar: <code>Ctrl</code> / <code>Clique</code> • Abrir: <code>Espaço</code> • Armas: <code>1-7</code></span>
+                </div>
+                <span class="doom-secret-badge">🔥 CHEAT ATIVADO</span>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/script.js" defer></script>
 </body>
 

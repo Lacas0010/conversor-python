@@ -1237,3 +1237,255 @@ md-linear-progress {
 .slide-out-right {
     animation: slideOutRight 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
+
+/* =========================================
+   EASTER EGG: DOOM 1 (1993) - IDDQD MODAL
+   ========================================= */
+
+.doom-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+
+.doom-modal.hidden {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.doom-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 3, 5, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.doom-window {
+    position: relative;
+    width: 880px;
+    max-width: 95vw;
+    height: 620px;
+    max-height: 90vh;
+    background: #09090b;
+    border: 2px solid #ef4444;
+    border-radius: 12px;
+    box-shadow: 0 0 45px rgba(239, 68, 68, 0.35), 0 25px 60px rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 2;
+    animation: doomPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease;
+}
+
+.doom-window.is-maximized {
+    width: 98vw;
+    height: 96vh;
+    max-width: 98vw;
+    max-height: 96vh;
+    border-radius: 6px;
+}
+
+@keyframes doomPopIn {
+    0% {
+        transform: scale(0.85) translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.doom-header {
+    background: linear-gradient(90deg, #1c0a0a 0%, #2e0f0f 50%, #180909 100%);
+    border-bottom: 1px solid #7f1d1d;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.doom-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doom-icon {
+    font-size: 1.25rem;
+    animation: doomPulse 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes doomPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 2px #ef4444); }
+    100% { transform: scale(1.15); filter: drop-shadow(0 0 8px #f97316); }
+}
+
+.doom-title {
+    font-family: 'Consolas', 'Courier New', monospace, sans-serif;
+    font-weight: 800;
+    font-size: 0.92rem;
+    letter-spacing: 1.2px;
+    color: #fca5a5;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+.doom-header-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.doom-action-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.doom-action-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ffffff;
+    border-color: #ef4444;
+}
+
+.doom-action-btn.doom-close:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #ef4444;
+    box-shadow: 0 0 14px rgba(220, 38, 38, 0.7);
+}
+
+.doom-action-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.doom-body {
+    flex: 1;
+    position: relative;
+    background: #000000;
+    overflow: hidden;
+}
+
+.doom-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #000;
+}
+
+.doom-loader {
+    position: absolute;
+    inset: 0;
+    background: #080808;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #f1f5f9;
+    z-index: 1;
+    transition: opacity 0.4s ease;
+}
+
+.doom-loader.loaded {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.doom-spinner {
+    width: 42px;
+    height: 42px;
+    border: 3px solid rgba(239, 68, 68, 0.2);
+    border-top-color: #ef4444;
+    border-right-color: #f97316;
+    border-radius: 50%;
+    animation: doomSpin 0.9s linear infinite;
+}
+
+@keyframes doomSpin {
+    to { transform: rotate(360deg); }
+}
+
+.doom-loading-text {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fca5a5;
+    letter-spacing: 0.8px;
+    font-family: monospace;
+}
+
+.doom-hint {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    max-width: 80%;
+    text-align: center;
+}
+
+.doom-footer {
+    background: #110808;
+    border-top: 1px solid #451212;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    gap: 12px;
+}
+
+.doom-controls-guide code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: #fca5a5;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.doom-secret-badge {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    color: #fef08a;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    border: 1px solid #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    white-space: nowrap;
+}
+
+/* Flash de ativação do Easter Egg */
+.doom-screen-flash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, rgba(220, 38, 38, 0.1) 70%, transparent 100%);
+    z-index: 99998;
+    pointer-events: none;
+    animation: doomFlashAnim 0.5s ease-out forwards;
+}
+
+@keyframes doomFlashAnim {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.05); }
+}
+

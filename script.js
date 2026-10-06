@@ -1166,3 +1166,130 @@ function connectHeartbeat() {
     };
 }
 connectHeartbeat();
+
+
+// =========================================
+// EASTER EGG: DOOM 1 (1993) - CHEAT "IDDQD"
+// =========================================
+
+(function initDoomEasterEgg() {
+    const CHEAT_CODE = "iddqd";
+    const DOOM_URL = "https://raz0red.github.io/webprboom/";
+    let secretBuffer = "";
+
+    const doomModal = document.getElementById("doom-modal");
+    const doomBackdrop = document.getElementById("doom-backdrop");
+    const doomWindow = document.getElementById("doom-window");
+    const doomIframe = document.getElementById("doom-iframe");
+    const doomLoader = document.getElementById("doom-loader");
+    const closeDoomBtn = document.getElementById("close-doom-btn");
+    const doomMaximizeBtn = document.getElementById("doom-maximize-btn");
+
+    function playDoomActivationSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const notes = [130.81, 164.81, 196.00, 261.63, 392.00, 523.25]; // Efeito sintetizado arpeggiado retrô
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.07);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.07);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.07 + 0.22);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime + idx * 0.07);
+                osc.stop(ctx.currentTime + idx * 0.07 + 0.25);
+            });
+        } catch (_) {
+            // Ignora se o contexto de áudio estiver bloqueado
+        }
+    }
+
+    function triggerScreenFlash() {
+        const flash = document.createElement("div");
+        flash.className = "doom-screen-flash";
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 600);
+    }
+
+    function abrirDoom() {
+        if (!doomModal) return;
+
+        triggerScreenFlash();
+        playDoomActivationSound();
+
+        // Exibe modal e prepara o loader
+        doomModal.classList.remove("hidden");
+        if (doomLoader) doomLoader.classList.remove("loaded");
+
+        // Carrega o jogo
+        if (doomIframe) {
+            doomIframe.onload = () => {
+                if (doomLoader) doomLoader.classList.add("loaded");
+            };
+            doomIframe.src = DOOM_URL;
+        }
+    }
+
+    function fecharDoom() {
+        if (!doomModal) return;
+        doomModal.classList.add("hidden");
+        if (doomWindow) doomWindow.classList.remove("is-maximized");
+        if (doomIframe) doomIframe.src = ""; // Pausa o áudio e descarrega a memória imediatamente
+        if (doomLoader) doomLoader.classList.remove("loaded");
+        if (doomMaximizeBtn) {
+            const icon = doomMaximizeBtn.querySelector(".material-symbols-outlined");
+            if (icon) icon.textContent = "fullscreen";
+        }
+    }
+
+    function toggleMaximize() {
+        if (!doomWindow) return;
+        doomWindow.classList.toggle("is-maximized");
+        const isMax = doomWindow.classList.contains("is-maximized");
+        if (doomMaximizeBtn) {
+            const icon = doomMaximizeBtn.querySelector(".material-symbols-outlined");
+            if (icon) icon.textContent = isMax ? "fullscreen_exit" : "fullscreen";
+        }
+    }
+
+    // Escuta teclas para o cheat
+    window.addEventListener("keydown", (e) => {
+        // Ignora se estiver preenchendo campos de texto
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
+        if (
+            activeTag === "input" || 
+            activeTag === "textarea" || 
+            activeTag === "md-outlined-text-field" || 
+            (document.activeElement && document.activeElement.isContentEditable)
+        ) {
+            return;
+        }
+
+        // Fecha modal com a tecla ESC
+        if (e.key === "Escape" && doomModal && !doomModal.classList.contains("hidden")) {
+            fecharDoom();
+            return;
+        }
+
+        if (e.key && e.key.length === 1) {
+            secretBuffer += e.key.toLowerCase();
+            if (secretBuffer.length > 20) {
+                secretBuffer = secretBuffer.slice(-20);
+            }
+
+            // Ativa com 'iddqd' (God Mode clássico) ou 'doom'
+            if (secretBuffer.endsWith(CHEAT_CODE) || secretBuffer.endsWith("doom")) {
+                abrirDoom();
+                secretBuffer = "";
+            }
+        }
+    });
+
+    if (closeDoomBtn) closeDoomBtn.addEventListener("click", fecharDoom);
+    if (doomBackdrop) doomBackdrop.addEventListener("click", fecharDoom);
+    if (doomMaximizeBtn) doomMaximizeBtn.addEventListener("click", toggleMaximize);
+})();
