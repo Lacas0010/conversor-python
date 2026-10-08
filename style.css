@@ -1270,10 +1270,10 @@ md-linear-progress {
 
 .doom-window {
     position: relative;
-    width: 880px;
+    width: 960px;
     max-width: 95vw;
-    height: 620px;
-    max-height: 90vh;
+    height: 680px;
+    max-height: 92vh;
     background: #09090b;
     border: 2px solid #ef4444;
     border-radius: 12px;
