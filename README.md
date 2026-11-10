@@ -23,7 +23,7 @@ Funciona como um verdadeiro **canivete suíço para arquivos**, executando tudo 
 - **🛡️ Película Anti-Iframe:** Camada protetora para permitir operações fluidas de arrastar e soltar (*Drag & Drop*) mesmo sobre visualizadores incorporados.
 - **🔌 Logs em Tempo Real:** Conexão contínua via **WebSocket** que transmite logs do backend diretamente para o console do terminal web.
 - **❤️ Encerramento Inteligente (Heartbeat):** Monitoramento de ciclo de vida via WebSocket. Ao fechar a aba do navegador, o servidor finaliza o processo local automaticamente para poupar memória.
-- **💀 Easter Egg Retro (DOOM 1993):** Emulador DOSBox WebAssembly integrado totalmente offline. Digite `iddqd` na interface para jogar o clássico DOOM (1993) em janela flutuante com som e suporte a teclado.
+- **💀 Easter Egg Retro (DOOM & DOOM II):** Emulador DOSBox WebAssembly integrado totalmente offline. Digite `iddqd` na interface para jogar o clássico DOOM (1993) ou `idkfa` para abrir o lendário **DOOM II: Hell on Earth (1994)** em janela flutuante com som e suporte a teclado.
 
 ---
 
@@ -147,6 +147,10 @@ conversor python/
 
 ---
 
-## 🎮 Easter Egg
+## 🎮 Easter Eggs
 
-Durante o uso da aplicação, experimente digitar a palavra mágica **`iddqd`** em qualquer lugar da tela para acionar a janela retrô de **DOOM (1993)**, rodando de forma 100% offline direto no navegador!
+Durante o uso da aplicação, experimente digitar os códigos clássicos em qualquer lugar da tela:
+- **`iddqd`**: Aciona o clássico **DOOM (1993)** [God Mode].
+- **`idkfa`**: Aciona o lendário **DOOM II: Hell on Earth (1994)** [All Weapons & Keys].
+
+Ambos rodam de forma 100% offline direto no navegador via WebAssembly!

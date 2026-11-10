@@ -112,7 +112,7 @@
 <body>
 
     <div id="loading-screen">
-        <div class="doom-title-loader">
+        <div id="doom-title-text" class="doom-title-loader">
             <span>💀</span> DOOM (1993)
         </div>
         <div class="progress-bar-container">
@@ -131,6 +131,30 @@
         const progressFill = document.getElementById('progress-fill');
         const loadingScreen = document.getElementById('loading-screen');
         const canvas = document.getElementById('jsdos-canvas');
+        const titleEl = document.getElementById('doom-title-text');
+
+        // Detecta se foi requisitado DOOM 1 ou DOOM 2
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDoom2 = urlParams.get('game') === 'doom2' || urlParams.get('v') === '2';
+
+        const gameConfig = isDoom2 ? {
+            name: "DOOM II: Hell on Earth (1994)",
+            shortName: "DOOM II (1994)",
+            bundle: "doom2.jsdos",
+            exe: "DOOM2.EXE",
+            wadName: "DOOM2.WAD"
+        } : {
+            name: "DOOM (1993)",
+            shortName: "DOOM (1993)",
+            bundle: "doom.jsdos",
+            exe: "DOOM.EXE",
+            wadName: "DOOM1.WAD"
+        };
+
+        if (titleEl) {
+            titleEl.innerHTML = `<span>💀</span> ${gameConfig.shortName}`;
+        }
+        document.title = `${gameConfig.name} - Offline Player`;
 
         function updateProgress(pct, text) {
             if (progressFill) progressFill.style.width = pct + '%';
@@ -149,19 +173,19 @@
                     }
                 }
             }).ready((fs, main) => {
-                updateProgress(65, 'Descompactando DOOM.WAD e arquivos do jogo...');
+                updateProgress(65, `Descompactando ${gameConfig.wadName} e arquivos do jogo...`);
                 
-                fs.extract("doom.jsdos").then(() => {
-                    updateProgress(100, 'Iniciando DOOM.EXE...');
+                fs.extract(gameConfig.bundle).then(() => {
+                    updateProgress(100, `Iniciando ${gameConfig.exe}...`);
                     setTimeout(() => {
                         loadingScreen.classList.add('hidden');
-                        main(["-c", "DOOM.EXE"]);
+                        main(["-c", gameConfig.exe]);
                         setTimeout(() => {
                             canvas.focus();
                         }, 500);
                     }, 300);
                 }).catch(err => {
-                    console.error("Erro ao descompactar bundle DOOM:", err);
+                    console.error(`Erro ao descompactar bundle ${gameConfig.bundle}:`, err);
                     updateProgress(100, 'Falha ao descompactar o jogo localmente.');
                 });
             }).catch(err => {

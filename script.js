@@ -1169,11 +1169,12 @@ connectHeartbeat();
 
 
 // =========================================
-// EASTER EGG: DOOM 1 (1993) - CHEAT "IDDQD"
+// EASTER EGG: DOOM 1 (1993) / DOOM 2 (1994)
 // =========================================
 
 (function initDoomEasterEgg() {
-    const CHEAT_CODE = "iddqd";
+    const CHEAT_DOOM1 = "iddqd";
+    const CHEAT_DOOM2 = "idkfa";
     const DOOM_URL = "/static/doom/index.html";
     let secretBuffer = "";
 
@@ -1182,26 +1183,31 @@ connectHeartbeat();
     const doomWindow = document.getElementById("doom-window");
     const doomIframe = document.getElementById("doom-iframe");
     const doomLoader = document.getElementById("doom-loader");
+    const doomTitle = document.getElementById("doom-title");
     const closeDoomBtn = document.getElementById("close-doom-btn");
     const doomMaximizeBtn = document.getElementById("doom-maximize-btn");
 
-    function playDoomActivationSound() {
+    function playDoomActivationSound(isDoom2 = false) {
         try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) return;
             const ctx = new AudioCtx();
-            const notes = [130.81, 164.81, 196.00, 261.63, 392.00, 523.25]; // Efeito sintetizado arpeggiado retrô
+            // Efeito sonoro retrô diferenciado para DOOM 2 (notas mais pesadas e rápidas)
+            const notes = isDoom2 
+                ? [98.00, 123.47, 146.83, 196.00, 246.94, 293.66, 392.00] 
+                : [130.81, 164.81, 196.00, 261.63, 392.00, 523.25];
+            const speed = isDoom2 ? 0.05 : 0.07;
             notes.forEach((freq, idx) => {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.07);
-                gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.07);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.07 + 0.22);
+                osc.type = isDoom2 ? "square" : "sawtooth";
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * speed);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * speed);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * speed + 0.22);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
-                osc.start(ctx.currentTime + idx * 0.07);
-                osc.stop(ctx.currentTime + idx * 0.07 + 0.25);
+                osc.start(ctx.currentTime + idx * speed);
+                osc.stop(ctx.currentTime + idx * speed + 0.25);
             });
         } catch (_) {
             // Ignora se o contexto de áudio estiver bloqueado
@@ -1215,22 +1221,30 @@ connectHeartbeat();
         setTimeout(() => flash.remove(), 600);
     }
 
-    function abrirDoom() {
+    function abrirDoom(gameVersion = "doom1") {
         if (!doomModal) return;
 
+        const isDoom2 = (gameVersion === "doom2");
         triggerScreenFlash();
-        playDoomActivationSound();
+        playDoomActivationSound(isDoom2);
+
+        // Atualiza título da janela modal
+        if (doomTitle) {
+            doomTitle.textContent = isDoom2 
+                ? "DOOM II: Hell on Earth (1994) — ALL WEAPONS [IDKFA]"
+                : "DOOM (1993) — GOD MODE [IDDQD]";
+        }
 
         // Exibe modal e prepara o loader
         doomModal.classList.remove("hidden");
         if (doomLoader) doomLoader.classList.remove("loaded");
 
-        // Carrega o jogo
+        // Carrega o jogo com o parâmetro correto
         if (doomIframe) {
             doomIframe.onload = () => {
                 if (doomLoader) doomLoader.classList.add("loaded");
             };
-            doomIframe.src = DOOM_URL;
+            doomIframe.src = `${DOOM_URL}?game=${isDoom2 ? 'doom2' : 'doom1'}`;
         }
     }
 
@@ -1281,9 +1295,14 @@ connectHeartbeat();
                 secretBuffer = secretBuffer.slice(-20);
             }
 
-            // Ativa com 'iddqd' (God Mode clássico) ou 'doom'
-            if (secretBuffer.endsWith(CHEAT_CODE) || secretBuffer.endsWith("doom")) {
-                abrirDoom();
+            // Ativa DOOM 2 com 'idkfa' ou 'doom2'
+            if (secretBuffer.endsWith(CHEAT_DOOM2) || secretBuffer.endsWith("doom2")) {
+                abrirDoom("doom2");
+                secretBuffer = "";
+            }
+            // Ativa DOOM 1 com 'iddqd' ou 'doom'
+            else if (secretBuffer.endsWith(CHEAT_DOOM1) || secretBuffer.endsWith("doom")) {
+                abrirDoom("doom1");
                 secretBuffer = "";
             }
         }
